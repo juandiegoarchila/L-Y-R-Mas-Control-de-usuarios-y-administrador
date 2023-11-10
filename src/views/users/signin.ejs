@@ -1,0 +1,26 @@
+<%- include('../layouts/Users-Cabecera.ejs') %>
+
+
+<br><br><br>
+<div class="col-md-4 mx-auto">
+  <%- include('../partials/errors.ejs') %>
+
+</div>
+<div class="container">
+
+  <form action="/users/signin" method="post">
+    <h1>Iniciar Sesión</h1>
+    <div class="form-group">
+      <input type="email" name="email" placeholder="Correo Electrónico" required>
+    </div>
+    <div class="form-group">
+      <input type="password" name="password" id="password" placeholder="Contraseña" required>
+      <i id="togglePasswordIcon" class="fas fa-eye" class="show-password-btn" onclick="togglePasswordVisibility('password', 'togglePasswordIcon')"></i>
+    </div>
+    <button type="submit">Iniciar Sesión</button>
+    <a href="/users/signup" class="btn">Registrarse</a>
+    <a href="/users/forgot-password" class="centered-link">Olvidaste tu Contraseña</a>
+  </form>
+</div>
+
+<%- include('../layouts/Users-Pie.ejs') %>

@@ -1,0 +1,26 @@
+<%- include('../layouts/Users-Cabecera.ejs') %>
+
+<div class="col-md-4 mx-auto">
+  <%- include('../partials/errors.ejs') %>
+</div>
+
+<div class="container">
+  <form action="/users/profile" method="post">
+    <div class="form-group">
+      <h1>Perfil de Usuario</h1>
+    </div>
+    <div class="form-group">
+      <label for="name">Nombre:</label>
+      <input type="text" name="name" value="<%= name || '' %>" required>
+    </div>
+    <div class="form-group">
+      <label for="email">Correo Electrónico:</label>
+      <input type="email" name="email" value="<%= email || '' %>" required>
+    </div>
+    <input type="hidden" name="uid" value="<%= uid %>" readonly>
+    <button type="submit">Actualizar</button>
+    <a class="btn btn-primary" href="/crud">Volver</a>
+  </form>
+</div>
+
+<%- include('../layouts/Users-Pie.ejs') %>

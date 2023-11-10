@@ -1,0 +1,40 @@
+<%- include('../layouts/Users-Cabecera.ejs') %>
+
+
+<br>
+<div class="col-md-4 mx-auto">
+  <%- include('../partials/errors.ejs') %>
+
+</div>
+
+<div class="container">
+  <form action="/users/signup" method="post">
+    <div class="form-group">
+      <h1>Registro</h1>
+      <input type="text" name="name" placeholder="Nombre" required>
+    </div>
+    <div class="form-group">
+      <input type="email" name="email" placeholder="Correo Electrónico" required>
+    </div>
+    <div class="form-group">
+      <input type="password" name="password" id="password" placeholder="Contraseña" required>
+      <i id="togglePasswordIcon" class="fas fa-eye" class="show-password-btn" onclick="togglePasswordVisibility('password', 'togglePasswordIcon')"></i>
+      <i id="togglePasswordIconClosed" class="fas fa-eye-slash" class="show-password-btn" onclick="togglePasswordVisibility('password', 'togglePasswordIconClosed')"></i>
+    </div>
+    <div class="form-group">
+      <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirmar Contraseña" required>
+      <i id="toggleConfirmPasswordIcon" class="fas fa-eye" class="show-password-btn" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPasswordIcon')"></i>
+      <i id="toggleConfirmPasswordIconClosed" class="fas fa-eye-slash" class="show-password-btn" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPasswordIconClosed')"></i>
+    </div>
+    <div class="form-group form-check">
+      <input type="checkbox" class="form-check-input" id="acceptTerms" required>
+    
+      <label class="form-check-label" for="acceptTerms">Acepto términos y condiciones de la plataforma</label>
+    </div>
+    <button type="submit">Registrarse</button>
+    
+    <a href="/users/signin" class="btn">Iniciar Sesión</a>
+  </form>
+</div>
+
+<%- include('../layouts/Users-Pie.ejs') %>

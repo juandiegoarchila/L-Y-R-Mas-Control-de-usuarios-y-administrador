@@ -1,0 +1,204 @@
+Funcinamiento del reCAPTCHA al tener un dominio 
+
+signup 
+<%- include('../layouts/Users-Cabecera.ejs') %>
+
+
+<%- include('../partials/errors.ejs') %>
+
+
+<br><br>
+<div class="container">
+  <form action="/users/signup" method="post">
+    <div class="form-group">
+      <h1>Registro</h1>
+      <input type="text" name="name" placeholder="Nombre" required>
+    </div>
+    <div class="form-group">
+      <input type="email" name="email" placeholder="Correo Electrónico" required>
+    </div>
+    <div class="form-group">
+      <input type="password" name="password" placeholder="Contraseña" required>
+    </div>
+    <div class="form-group">
+      <input type="password" name="confirm_password" placeholder="Confirmar Contraseña" required>
+    </div>
+    <div class="form-group form-check">
+      <input type="checkbox" class="form-check-input" id="acceptTerms" required>
+      <label class="form-check-label" for="acceptTerms">Acepto términos y condiciones de la plataforma</label>
+    </div>
+    <div class="g-recaptcha" data-sitekey="6LdwYQEpAAAAACmv3x_ntSPkSiyKVVnsWbyYY9ZF"></div>
+
+    <button type="submit">Registrarse</button>
+
+    <a href="/users/signin" class="btn">Iniciar Sesión</a>
+  </form>
+</div>
+
+<%- include('../layouts/Users-Pie.ejs') %>
+
+
+Usercontroller.js 
+const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, sendEmailVerification } = require('firebase/auth');
+const { getFirestore, collection, addDoc } = require('firebase/firestore');
+const axios = require('axios');
+
+const app = require('../config/Conexion');
+
+const userCtrol = {};
+
+userCtrol.rendersignupForm = (req, res) => {
+  res.render('users/signup');
+};
+
+userCtrol.signup = async (req, res) => {
+  const { name, email, password, confirm_password, 'g-recaptcha-response': recaptchaResponse } = req.body;
+  const auth = getAuth(app);
+  const firestore = getFirestore(app);
+
+  // Verifica si el reCAPTCHA se ha resuelto
+  if (!recaptchaResponse) {
+    req.flash('error_msg', 'Por favor, completa el reCAPTCHA.');
+    return res.redirect('/users/signup');
+  }
+
+  // Realiza la verificación del reCAPTCHA con Google
+  const secretKey = '6LdwYQEpAAAAACmv3x_ntSPkSiyKVVnsWbyYY9ZF'; // Reemplaza con tu clave secreta
+  const verificationURL = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${recaptchaResponse}`;
+
+  try {
+    const recaptchaVerification = await axios.post(verificationURL);
+    if (!recaptchaVerification.data.success) {
+      req.flash('error_msg', 'Falló la verificación del reCAPTCHA. ¿Eres un robot?');
+      return res.redirect('/users/signup');
+    }
+  } catch (error) {
+    console.error('Error al verificar reCAPTCHA:', error);
+    req.flash('error_msg', 'Error al verificar el reCAPTCHA.');
+    return res.redirect('/users/signup');
+  }
+
+  if (password !== confirm_password) {
+    req.flash('error_msg', 'Las contraseñas no coinciden');
+    return res.redirect('/users/signup');
+  }
+
+  if (password.length < 6) {
+    req.flash('error_msg', 'La contraseña debe tener al menos 6 caracteres');
+    return res.redirect('/users/signup');
+  }
+
+  try {
+    // Crea un nuevo usuario con Firebase Authentication
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Envía un correo de verificación al usuario
+    await sendEmailVerification(user);
+
+    // Guarda la información del usuario en Firestore
+    const userRef = collection(firestore, 'users');
+    await addDoc(userRef, {
+      uid: user.uid,
+      name: name,
+      email: email,
+    });
+
+    req.flash('success_msg', '¡Registro exitoso! Se ha enviado un correo de verificación a tu dirección de correo electrónico.');
+    res.redirect('/users/signin');
+  } catch (error) {
+    console.error('Error al crear el usuario:', error);
+    req.flash('error_msg', 'Error al crear el usuario');
+    res.redirect('/users/signup');
+  }
+};
+
+
+
+
+
+userCtrol.rendersigninForm = (req, res) => {
+  res.render('users/signin');
+};
+
+userCtrol.signin = async (req, res, next) => {
+  const { email, password } = req.body;
+  const auth = getAuth(app);
+
+  try {
+    // Inicia sesión con Firebase Authentication
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    if (!user.emailVerified) {
+      // El usuario no ha verificado su correo electrónico
+      req.flash('error_msg', 'Debes verificar tu correo electrónico antes de iniciar sesión.');
+      return res.redirect('/users/signin');
+    }
+
+    req.flash('success_msg', '¡Sesión iniciada!');
+    res.redirect('/crud'); // Redirige al "crud" o la página que desees.
+  } catch (error) {
+    console.error('Usuario o contraseña incorrectos', error);
+    req.flash('error_msg', 'Usuario o contraseña incorrectos');
+    res.redirect('/users/signin');
+  }
+};
+
+
+userCtrol.logout = (req, res) => {
+  const auth = getAuth(app);
+
+  signOut(auth)
+    .then(() => {
+      req.flash('success_msg', 'Sesión cerrada exitosamente');
+      res.redirect('/users/signin');
+    })
+    .catch((error) => {
+      console.error('Error al cerrar sesión:', error);
+      req.flash('error_msg', 'Error al cerrar sesión');
+      res.redirect('/');
+    });
+},
+
+// Renderiza el formulario para restablecer la contraseña
+userCtrol.renderForgotPasswordForm = (req, res) => {
+  res.render('users/forgot-password');
+};
+
+// Procesa la solicitud de restablecimiento de contraseña
+userCtrol.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  const auth = getAuth(app);
+
+  try {
+    // Envía un correo electrónico para restablecer la contraseña
+    await sendPasswordResetEmail(auth, email);
+    req.flash('success_msg', 'Se ha enviado un correo electrónico para restablecer tu contraseña.');
+    res.redirect('/users/signin'); // Redirige a la página de inicio de sesión.
+  } catch (error) {
+    console.error('Error al enviar el correo electrónico de restablecimiento de contraseña:', error);
+    req.flash('error_msg', 'Error al enviar el correo electrónico de restablecimiento de contraseña');
+    res.redirect('/users/forgot-password');
+  }
+},
+
+module.exports = userCtrol;
+
+
+users-cabecera.ejs 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6LdwYQEpAAAAACmv3x_ntSPkSiyKVVnsWbyYY9ZF" async defer></script>
+
+    <link rel="stylesheet" href="/User.css">
+    
+    <title>Hola</title>
+</head>
+<body >
+            

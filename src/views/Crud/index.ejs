@@ -1,0 +1,59 @@
+<%- include('../layouts/cabecera.ejs') %>
+<br>
+<br>
+<%- include('../partials/errors.ejs') %>
+
+<div class="container mt-4">
+    <a href="/crud/crear" class="btn btn-primary" type="button">Crear un nuevo libro</a>
+    <br><br>
+    <table class="table table-light">
+        <thead class="thead-light">
+            <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Imagen</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% if (CRUD && CRUD.length > 0) { %>
+                <% let counter = 1; %>
+                <% CRUD.forEach(Tabla => { %>
+                  <tr>
+                    <td>
+                      <%= counter %>
+                    </td>
+                    <td>
+                        <%= Tabla.nombre %>
+                    </td>
+                    <td>
+                        <img class="img-thumbnail" width="100" src="/imagenes/<%= Tabla.imagen %>" alt="">
+                    </td>
+                    <td>
+                        <div class="btn-group-vertical" role="group" aria-label="vertical button group">
+                            <a href="/crud/editar/<%= Tabla.id %>" class="btn btn-warning">Editar</a>
+                        </div>
+                        
+
+                        |
+                        <div class="btn-group-vertical" role="group" aria-label="vertical button group">
+                            <form action="/crud/eliminar/<%= Tabla.id %>" method="POST">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button class="btn btn-danger" type="submit">Borrar</button>
+                            </form>
+
+                        </div>
+                    </td>
+                </tr>
+                <% counter++; %>
+                <% }); %>
+                <% } else { %>
+                <tr>
+                    <td colspan="4">No hay Libros disponibles.</td>
+                </tr>
+                <% } %>
+        </tbody>
+    </table>
+</div>
+
+<%- include('../layouts/pie.ejs') %>
