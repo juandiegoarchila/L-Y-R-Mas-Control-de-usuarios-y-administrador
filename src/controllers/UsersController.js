@@ -110,6 +110,7 @@ userCtrol.forgotPassword = async (req, res) => {
     res.redirect('/users/forgot-password');
   }
 };
+// Controlador para renderizar el perfil del usuario
 userCtrol.renderProfile = async (req, res) => {
   const auth = getAuth(app);
   const user = auth.currentUser;
@@ -125,8 +126,7 @@ userCtrol.renderProfile = async (req, res) => {
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
         // Pasa los datos del usuario a la vista
-        res.render('layouts/cabecera', { name: userData.name }); // Asegúrate de tener el nombre del usuario disponible
-
+        res.render('users/profile', { name: userData.name, email: userData.email, uid: user.uid });
       } else {
         req.flash('error_msg', 'No se encontró información del usuario.');
         res.redirect('/users/signin');
@@ -160,13 +160,12 @@ userCtrol.updateProfile = async (req, res) => {
         // Actualiza la información del usuario en Firestore
         await updateDoc(userDocRef, {
           name: name,
-          email: email // Asegúrate de que el email pueda ser actualizado en tu configuración de Firebase
+          email: email // Asegúrate de que el email puede ser actualizado en tu configuración de Firebase
         });
 
         // Opcional: Actualiza el perfil de Firebase Auth, si es necesario
         // await updateProfile(user, { displayName: name, email: email });
 
-        // Configura un mensaje de éxito y redirige al usuario a la página de perfil
         req.flash('success_msg', 'Perfil actualizado exitosamente');
         res.redirect('/users/profile');
       } else {

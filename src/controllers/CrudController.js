@@ -1,56 +1,138 @@
-const { getFirestore, collection, addDoc, getDoc, deleteDoc, doc, getDocs, updateDoc } = require('firebase/firestore');
+const { getFirestore, collection, addDoc, getDoc, deleteDoc, doc, getDocs, updateDoc, query, where } = require('firebase/firestore');
+const { getAuth } = require('firebase/auth');
 const app = require('../config/Conexion');
 const multer = require('multer');
-const db = getFirestore(app);
 const fs = require('fs');
 const path = require('path');
 
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// Resto del código sin cambios
+
 module.exports = {
   index: async function (req, res) {
-    const crudCollection = collection(db, "CRUD"); 
-    const CrudSnapshot = await getDocs(crudCollection); 
-    const CRUD = CrudSnapshot.docs.map((doc) => {
-      const data = doc.data();
-      return { id: doc.id, nombre: data.nombre, imagen: data.imagen };
-    });
+    const auth = getAuth(app);
+    const user = auth.currentUser;
 
-    res.render('Crud/index', { CRUD: CRUD });
-  },
+    if (user) {
+      const firestore = getFirestore(app);
+      const userRef = collection(firestore, 'users');
+      const userQuery = query(userRef, where('uid', '==', user.uid));
 
-  crear: function (req, res) {
-    res.render('Crud/crear');
-  },
+      try {
+        const querySnapshot = await getDocs(userQuery);
 
-  creardato: async function (req, res) {
-    try {
-      const { nombre } = req.body;
-      let imagen = null;
-  
-      if (req.file) {
-        imagen = req.file.filename;
+        if (!querySnapshot.empty) {
+          const userData = querySnapshot.docs[0].data();
+
+          // Obtén los datos CRUD de tu base de datos
+          const crudCollection = collection(db, "CRUD"); 
+          const CrudSnapshot = await getDocs(crudCollection); 
+          const CRUD = CrudSnapshot.docs.map((doc) => {
+            const data = doc.data();
+            return { id: doc.id, nombre: data.nombre, imagen: data.imagen };
+          });
+
+          // Renderiza la vista con los datos del usuario y los datos CRUD
+          res.render('Crud/index', { name: userData.name, CRUD: CRUD });
+        } else {
+          req.flash('error_msg', 'No se encontró información del usuario.');
+          res.redirect('/users/signin');
+        }
+      } catch (error) {
+        console.error('Error al consultar Firestore:', error);
+        req.flash('error_msg', 'Error al consultar Firestore');
+        res.redirect('/users/signin');
       }
-  
-      if (!nombre && !imagen) {
-        req.flash('error_msg', 'Debes proporcionar al menos un campo (Nombre o Imagen)');
-        return res.render('Crud/crear', { nombre, error_msg: req.flash('error_msg') });
-      }
-  
-      const crudCollection = collection(db, "CRUD");
-      const nuevodato = {
-        nombre,
-        imagen,
-      };
-  
-      await addDoc(crudCollection, nuevodato);
-        req.flash('success_msg', 'Creación de un nuevo libro');
-  
-      res.redirect('/crud');
-    } catch (error) {
-      console.error("Error al agregar dato: ", error);
-      res.status(500).send("Error al agregar dato: " + error.message);
+    } else {
+      req.flash('error_msg', 'Debes iniciar sesión para ver tu perfil.');
+      res.redirect('/users/signin');
     }
+  },
+
+  crear: async function (req, res) {
+    try {
+      const auth = getAuth(app);
+      const user = auth.currentUser;
+
+      if (user) {
+        const firestore = getFirestore(app);
+        const userRef = collection(firestore, 'users');
+        const userQuery = query(userRef, where('uid', '==', user.uid));
+        const userSnapshot = await getDocs(userQuery);
+
+        if (!userSnapshot.empty) {
+          const userData = userSnapshot.docs[0].data();
+
+          res.render('Crud/crear', { name: userData.name });
+        } else {
+          req.flash('error_msg', 'No se encontró información del usuario.');
+          res.redirect('/users/signin');
+        }
+      } else {
+        req.flash('error_msg', 'Debes iniciar sesión para crear un libro.');
+        res.redirect('/users/signin');
+      }
+    } catch (error) {
+      console.error('Error al consultar Firestore:', error);
+      req.flash('error_msg', 'Error al consultar Firestore');
+      res.redirect('/users/signin');
+    }
+  },
+
+creardato: async function (req, res) {
+  try {
+    const { nombre } = req.body;
+    let imagen = null;
+
+    if (req.file) {
+      imagen = req.file.filename;
+    }
+
+    // Obtén la información del usuario
+    const auth = getAuth(app);
+    const user = auth.currentUser;
+
+    if (!nombre && !imagen) {
+      if (user) {
+        const firestore = getFirestore(app);
+        const userRef = collection(firestore, 'users');
+        const userQuery = query(userRef, where('uid', '==', user.uid));
+        const userSnapshot = await getDocs(userQuery);
+
+        if (!userSnapshot.empty) {
+          const userData = userSnapshot.docs[0].data();
+
+          // Renderiza la vista con el mensaje de error y el nombre del usuario
+          req.flash('error_msg', 'Debes proporcionar al menos un campo (Nombre o Imagen)');
+          return res.render('Crud/crear', { nombre, error_msg: req.flash('error_msg'), name: userData.name });
+        } else {
+          console.log("Usuario no encontrado en Firestore. Redireccionando...");
+          res.status(404).send("El usuario no se encontró en la base de datos.");
+        }
+      } else {
+        req.flash('error_msg', 'Debes iniciar sesión para crear un libro y proporcionar al menos un campo (Nombre o Imagen)');
+        return res.redirect('/users/signin');
+      }
+    }
+
+    const crudCollection = collection(db, "CRUD");
+    const nuevodato = {
+      nombre,
+      imagen,
+    };
+
+    await addDoc(crudCollection, nuevodato);
+    req.flash('success_msg', 'Creación de un nuevo libro');
+
+    res.redirect('/crud');
+  } catch (error) {
+    console.error("Error al agregar dato: ", error);
+    res.status(500).send("Error al agregar dato: " + error.message);
   }
-  ,
+},
+
 
 
   eliminar: async function (req, res) {
@@ -86,18 +168,47 @@ module.exports = {
   
   
   mostrarFormularioEdicion: async function (req, res) {
-    const id = req.params.id;
-    const crudCollection = collection(db, 'CRUD'); 
-    const CrudRef = doc(crudCollection, id); 
-    const CrudSnapshot = await getDoc(CrudRef);
-
-    if (CrudSnapshot.exists()) {
-      const CrudData = CrudSnapshot.data();
-      res.render('Crud/editar', { Tabla: CrudData, id: id }); 
-    } else {
-      res.status(404).send('El libro no se encontró en la base de datos.');
+    try {
+      const id = req.params.id;
+  
+      // Obtén la información del libro
+      const CrudSnapshot = await getDoc(doc(collection(db, 'CRUD'), id));
+  
+      if (CrudSnapshot.exists()) {
+        const CrudData = CrudSnapshot.data();
+  
+        // Obtén la información del usuario
+        const auth = getAuth(app);
+        const user = auth.currentUser;
+  
+        if (user) {
+          const firestore = getFirestore(app);
+          const userRef = collection(firestore, 'users');
+          const userQuery = query(userRef, where('uid', '==', user.uid));
+          const userSnapshot = await getDocs(userQuery);
+  
+          if (!userSnapshot.empty) {
+            const userData = userSnapshot.docs[0].data();
+  
+            // Renderiza la vista con los datos del libro y del usuario
+            res.render('Crud/editar', { Tabla: CrudData, id, name: userData.name });
+          } else {
+            console.log("Usuario no encontrado en Firestore. Redireccionando...");
+            res.status(404).send("El usuario no se encontró en la base de datos.");
+          }
+        } else {
+          req.flash('error_msg', 'Debes iniciar sesión para editar un libro.');
+          res.redirect('/users/signin');
+        }
+      } else {
+        res.status(404).send('El libro no se encontró en la base de datos.');
+      }
+    } catch (error) {
+      console.error("Error al obtener datos para editar: ", error);
+      res.status(500).send("Error al obtener datos para editar: " + error.message);
     }
   },
+  
 
   actualizar: async function (req, res) {
     try {
