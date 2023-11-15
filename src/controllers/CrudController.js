@@ -81,58 +81,58 @@ module.exports = {
     }
   },
 
-creardato: async function (req, res) {
-  try {
-    const { nombre } = req.body;
-    let imagen = null;
-
-    if (req.file) {
-      imagen = req.file.filename;
-    }
-
-    // Obtén la información del usuario
-    const auth = getAuth(app);
-    const user = auth.currentUser;
-
-    if (!nombre && !imagen) {
-      if (user) {
-        const firestore = getFirestore(app);
-        const userRef = collection(firestore, 'users');
-        const userQuery = query(userRef, where('uid', '==', user.uid));
-        const userSnapshot = await getDocs(userQuery);
-
-        if (!userSnapshot.empty) {
-          const userData = userSnapshot.docs[0].data();
-
-          // Renderiza la vista con el mensaje de error y el nombre del usuario
-          req.flash('error_msg', 'Debes proporcionar al menos un campo (Nombre o Imagen)');
-          return res.render('Crud/crear', { nombre, error_msg: req.flash('error_msg'), name: userData.name });
-        } else {
-          console.log("Usuario no encontrado en Firestore. Redireccionando...");
-          res.status(404).send("El usuario no se encontró en la base de datos.");
-        }
-      } else {
-        req.flash('error_msg', 'Debes iniciar sesión para crear un libro y proporcionar al menos un campo (Nombre o Imagen)');
-        return res.redirect('/users/signin');
+  creardato: async function (req, res) {
+    try {
+      const { nombre } = req.body;
+      let imagen = null;
+  
+      if (req.file) {
+        imagen = req.file.filename;
       }
+  
+      // Obtén la información del usuario
+      const auth = getAuth(app);
+      const user = auth.currentUser;
+  
+      if (!nombre && !imagen) {
+        if (user) {
+          const firestore = getFirestore(app);
+          const userRef = collection(firestore, 'users');
+          const userQuery = query(userRef, where('uid', '==', user.uid));
+          const userSnapshot = await getDocs(userQuery);
+  
+          if (!userSnapshot.empty) {
+            const userData = userSnapshot.docs[0].data();
+  
+            // Renderiza la vista con el mensaje de error y el nombre del usuario
+            req.flash('error_msg', 'Debes proporcionar al menos un campo (Nombre o Imagen)');
+            return res.render('Crud/crear', { nombre, error_msg: req.flash('error_msg'), name: userData.name });
+          } else {
+            console.log("Usuario no encontrado en Firestore. Redireccionando...");
+            res.status(404).send("El usuario no se encontró en la base de datos.");
+          }
+        } else {
+          req.flash('error_msg', 'Debes iniciar sesión para crear un libro y proporcionar al menos un campo (Nombre o Imagen)');
+          return res.redirect('/users/signin');
+        }
+      }
+  
+      const crudCollection = collection(db, "CRUD");
+      const nuevodato = {
+        nombre,
+        imagen,
+      };
+  
+      await addDoc(crudCollection, nuevodato);
+      req.flash('success_msg', 'Creación de un nuevo libro');
+  
+      res.redirect('/crud');
+    } catch (error) {
+      console.error("Error al agregar dato: ", error);
+      res.status(500).send("Error al agregar dato: " + error.message);
     }
-
-    const crudCollection = collection(db, "CRUD");
-    const nuevodato = {
-      nombre,
-      imagen,
-    };
-
-    await addDoc(crudCollection, nuevodato);
-    req.flash('success_msg', 'Creación de un nuevo libro');
-
-    res.redirect('/crud');
-  } catch (error) {
-    console.error("Error al agregar dato: ", error);
-    res.status(500).send("Error al agregar dato: " + error.message);
-  }
-},
-
+  },
+  
 
 
   eliminar: async function (req, res) {

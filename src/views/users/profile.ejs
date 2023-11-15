@@ -5,22 +5,43 @@
 </div>
 
 <div class="container">
-  <form action="/users/profile" method="post">
+  <form action="/users/profile" method="post" enctype="multipart/form-data">
     <div class="form-group">
       <h1>Perfil de Usuario</h1>
     </div>
+
+    <!-- Muestra la imagen de perfil actual -->
+    <img class="profile-image" src="<%= profileImageUrl %>" alt="Perfil de <%= name %>">
+
+    <div class="form-group">
+      <label for="profileImage">Imagen de Perfil:</label>
+      <input type="file" name="profileImage" accept="image/*">
+    </div>
+    
     <div class="form-group">
       <label for="name">Nombre:</label>
       <input type="text" name="name" value="<%= name || '' %>" required>
     </div>
+    
     <div class="form-group">
       <label for="email">Correo Electrónico:</label>
       <input type="email" name="email" value="<%= email || '' %>" required>
     </div>
+
     <input type="hidden" name="uid" value="<%= uid %>" readonly>
     <button type="submit">Actualizar</button>
     <a class="btn btn-primary" href="/crud">Volver</a>
   </form>
 </div>
+<style>
+  .profile-image {
+    width: 150px; /* Elige el ancho que desees para la imagen */
+    height: 150px; /* Elige la altura que desees para la imagen */
+    border-radius: 50%; /* Esto hará que la imagen tenga forma redonda */
+    display: block;
+    margin: 0 auto; /* Esto centrará la imagen horizontalmente */
+    object-fit: cover; /* Esto ajustará la imagen al contenedor manteniendo su relación de aspecto */
+  }
+</style>
 
 <%- include('../layouts/Users-Pie.ejs') %>

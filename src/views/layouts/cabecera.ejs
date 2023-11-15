@@ -72,7 +72,11 @@
                 
                 <div class="dropdown">
                     <button class="dropbtn">
-                      <img src="/imagenes/foto.perfil.jpg" alt="" id="profileImage" class="user">
+                      <% if (typeof profileImageUrl !== 'undefined') { %>
+                        <img src="<%= profileImageUrl %>" alt="" id="profileImage" class="user">
+                      <% } else { %>
+                        <img src="/imagenes/foto.perfil.jpg" alt="" id="profileImage" class="user">
+                      <% } %>
                       <% if (typeof name !== 'undefined') { %>
                         <span><%= name %></span>
                       <% } %>
@@ -82,6 +86,7 @@
                       <a href="/users/profile">Perfil</a>
                     </div>
                   </div>
+                  
                   
                 </div>
                 
