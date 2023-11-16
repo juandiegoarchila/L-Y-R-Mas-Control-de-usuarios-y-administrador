@@ -7,17 +7,17 @@
 <div class="container">
   <form action="/users/profile" method="post" enctype="multipart/form-data">
     <div class="form-group">
-      <h1>Perfil de Usuario</h1>
+      <h1>Actualizar perfil</h1>
     </div>
 
-    <!-- Muestra la imagen de perfil actual -->
-    <img class="profile-image" src="<%= profileImageUrl %>" alt="Perfil de <%= name %>">
+    <!-- Etiqueta de la imagen de perfil -->
+    <label for="profileImage" class="profile-image-label">
+      <!-- Agrega un elemento img para mostrar la previsualización -->
+      <img class="profile-image" src="<%= profileImageUrl || '/imagenes/avatar.jpg' %>" alt="Perfil de <%= name %>" id="previewImage">
+      <!-- Agrega el input de la imagen -->
+      <input type="file" name="profileImage" accept="image/*" id="profileImage" style="display:none;" onchange="handleImageChange(this)">
+    </label>
 
-    <div class="form-group">
-      <label for="profileImage">Imagen de Perfil:</label>
-      <input type="file" name="profileImage" accept="image/*">
-    </div>
-    
     <div class="form-group">
       <label for="name">Nombre:</label>
       <input type="text" name="name" value="<%= name || '' %>" required>
@@ -33,15 +33,7 @@
     <a class="btn btn-primary" href="/crud">Volver</a>
   </form>
 </div>
-<style>
-  .profile-image {
-    width: 150px; /* Elige el ancho que desees para la imagen */
-    height: 150px; /* Elige la altura que desees para la imagen */
-    border-radius: 50%; /* Esto hará que la imagen tenga forma redonda */
-    display: block;
-    margin: 0 auto; /* Esto centrará la imagen horizontalmente */
-    object-fit: cover; /* Esto ajustará la imagen al contenedor manteniendo su relación de aspecto */
-  }
-</style>
 
 <%- include('../layouts/Users-Pie.ejs') %>
+
+

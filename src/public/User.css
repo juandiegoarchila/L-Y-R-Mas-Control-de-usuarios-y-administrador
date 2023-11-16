@@ -88,3 +88,25 @@ a.btn:hover {
 .form-group {
   position: relative;
 }
+/* 
+profile style */
+.profile-image-label {
+  display: block;
+  text-align: center; /* Esto centrará la imagen y el input */
+}
+
+.profile-image {
+  width: 150px; /* Elige el ancho que desees para la imagen */
+  height: 150px; /* Elige la altura que desees para la imagen */
+  border-radius: 50%; /* Esto hará que la imagen tenga forma redonda */
+  display: block;
+  margin: 0 auto; /* Esto centrará la imagen horizontalmente */
+  object-fit: cover; /* Esto ajustará la imagen al contenedor manteniendo su relación de aspecto */
+  cursor: pointer; /* Cambia el cursor al pasar sobre la imagen para indicar que es clickeable */
+  transition: 0.3s; /* Agrega una transición suave al pasar sobre la imagen */
+}
+
+/* Añade un efecto de sombra sutil al pasar el ratón sobre la imagen */
+.profile-image:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}

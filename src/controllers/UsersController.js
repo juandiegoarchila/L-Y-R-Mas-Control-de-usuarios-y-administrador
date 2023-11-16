@@ -174,68 +174,78 @@ userCtrol.updateProfile = async (req, res) => {
       if (!querySnapshot.empty) {
         const userDocRef = querySnapshot.docs[0].ref;
 
-        // Elimina la imagen de perfil anterior, si existe
+        // Obtener la información actual del usuario
         const userData = querySnapshot.docs[0].data();
-        if (userData.profileImageUrl) {
-          const storage = getStorage(app);
-          const previousImageRef = ref(storage, userData.profileImageUrl);
-          try {
-            await deleteObject(previousImageRef);
-            debug('Previous profile image deleted successfully!');
-          } catch (error) {
-            console.error('Error deleting previous profile image:', error);
-            req.flash('error_msg', 'Hubo un error al eliminar la imagen anterior.');
-            return res.redirect('/users/profile');
-          }
-        }
 
-        // Actualiza la información del usuario en Firestore
-        await updateDoc(userDocRef, {
-          name: name,
-          email: email // Asegúrate de que el email pueda ser actualizado en tu configuración de Firebase
-        });
+        // Guardar la URL actual de la imagen de perfil
+        let profileImageUrl = userData.profileImageUrl;
 
-        // Actualiza el perfil de Firebase Auth, si es necesario
-        await updateProfile(user, { displayName: name, email: email });
-
-        // Sube la nueva imagen de perfil a Firebase Storage, si se proporciona
+        // Verificar si se proporciona una nueva imagen de perfil
         if (req.files && req.files.profileImage) {
           const storage = getStorage(app);
+
+          // Eliminar la imagen de perfil anterior, si existe
+          if (profileImageUrl) {
+            const previousImageRef = ref(storage, profileImageUrl);
+            try {
+              await deleteObject(previousImageRef);
+              debug('Previous profile image deleted successfully!');
+            } catch (error) {
+              console.error('Error deleting previous profile image:', error);
+              req.flash('error_msg', 'Hubo un error al eliminar la imagen anterior.');
+              return res.redirect('/users/profile');
+            }
+          }
+
+          // Subir la nueva imagen de perfil a Firebase Storage
           const profileImageRef = ref(storage, `Avatar/${Date.now()}_${req.files.profileImage[0].originalname}`);
           
           // Mostrar información de depuración en la consola
           debug('Uploading profile image:', req.files.profileImage);
-        
+
           try {
-            // Corrección: Utiliza req.files.profileImage[0].buffer
+            // Corrección: Utilizar req.files.profileImage[0].buffer
             await uploadBytes(profileImageRef, req.files.profileImage[0].buffer, {
               contentType: req.files.profileImage[0].mimetype // Establecer el tipo de contenido
             });
-        
-            // Obtiene la URL de la nueva imagen
-            const imageUrl = await getDownloadURL(profileImageRef);
-        
-            // Guarda la URL en Firestore
-            await updateDoc(userDocRef, { profileImageUrl: imageUrl });
-        
+
+            // Obtener la URL de la nueva imagen
+            profileImageUrl = await getDownloadURL(profileImageRef);
+
+            // Actualizar la URL de la imagen en Firestore
+            await updateDoc(userDocRef, { profileImageUrl });
+
             debug('Profile image uploaded successfully!');
           } catch (error) {
             console.error('Error uploading profile image:', error);
             req.flash('error_msg', 'Hubo un error al subir la nueva imagen. Por favor, inténtalo de nuevo más tarde.');
             return res.redirect('/users/profile');
           }
-        
-        } else {
-          // Si no se proporciona una nueva imagen, elimina la URL de la imagen de perfil
-          await updateDoc(userDocRef, { profileImageUrl: null });
         }
 
-        // Recarga los datos del usuario para actualizar el formulario
+        // Actualizar la información del usuario en Firestore
+        await updateDoc(userDocRef, {
+          name: name,
+          email: email // Asegúrate de que el email pueda ser actualizado en tu configuración de Firebase
+        });
+
+        // Actualizar el perfil de Firebase Auth, si es necesario
+        await updateProfile(user, { displayName: name, email: email });
+
+        // Si el usuario no tiene una imagen de perfil, establecer una imagen predeterminada
+        if (!profileImageUrl) {
+          // Puedes establecer la URL de una imagen predeterminada aquí
+          profileImageUrl = '/imagenes/default-avatar.jpg';
+          await updateDoc(userDocRef, { profileImageUrl });
+        }
+
+        // Recargar los datos del usuario para actualizar el formulario
         const updatedUserDoc = await getDoc(userDocRef);
         const updatedUserData = updatedUserDoc.data();
 
         req.flash('success_msg', 'Perfil actualizado exitosamente');
-        return res.render('users/profile', { name: updatedUserData.name, email: updatedUserData.email, uid: user.uid, profileImageUrl: updatedUserData.profileImageUrl });
+        // Renderizar la vista sin necesidad de redirección
+        return res.redirect('users/profile', { name: updatedUserData.name, email: updatedUserData.email, uid: user.uid, profileImageUrl });
       } else {
         req.flash('error_msg', 'No se encontró información del usuario para actualizar.');
         return res.redirect('/users/profile'); // Usa "return" para evitar enviar respuestas múltiples

@@ -10,4 +10,18 @@ function togglePasswordVisibility(inputId, iconId) {
       passwordIcon.className = 'fas fa-eye';
     }
   }
-  
+
+  // script para manejar la previsualización de la imagen
+  function handleImageChange(input) {
+    const previewImage = document.getElementById('previewImage');
+
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+
+      reader.onload = function (e) {
+        previewImage.src = e.target.result;
+      };
+
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
