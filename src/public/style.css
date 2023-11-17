@@ -709,7 +709,7 @@ body {
     border: none;
     cursor: pointer;
     font-size: 20px;
-    margin-left: 100px;
+    margin-left: 30px;
 }
 
 /* Estilos para la lista desplegable */
@@ -718,18 +718,19 @@ body {
     display: inline-block;
 }
 
-/* Estilos para el contenido de la lista desplegable (inicialmente oculto) */
 .dropdown-content   {
     display: none;
     position: absolute;
     background-color: #f9f9f9;
-    min-width: 160px;
+    min-width: 100px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
-    margin-left: 100px;
     margin-top: 10px;
+    margin-left: 0; /* Ajusta el margen izquierdo según tus preferencias */
+    white-space: nowrap; /* Evita el desbordamiento de texto */
 
-
+    /* Ajustes adicionales para hacerlo responsive */
+    right: 0; /* Alinea el menú desplegable a la derecha */
 }
 
 /* Estilos para los enlaces dentro de la lista desplegable */
@@ -743,6 +744,7 @@ body {
 /* Cambiar el color del enlace al pasar el ratón por encima */
 .dropdown-content a:hover  {
     background-color: #ddd;
+
 }
 
 
