@@ -72,9 +72,9 @@
                 
                 <div class="dropdown">
                     <button class="dropbtn">
-                        <img src="<%= profileImageUrl ? profileImageUrl : '/imagenes/avatar.jpg' %>" alt="" id="profileImage" class="user">
+                        <img src="<%= profileImageUrl || '/imagenes/avatar.jpg' %>" alt="" id="profileImage" class="user">
                         <% if (typeof name !== 'undefined') { %>
-                          <span><%= name %></span>
+<span class="userName"><%= name %></span>
                         <% } %>
                       </button>
                     <div class="dropdown-content" id="dropdownContent">

@@ -112,7 +112,6 @@ userCtrol.forgotPassword = async (req, res) => {
     res.redirect('/users/forgot-password');
   }
 };
-// Controlador para renderizar el perfil del usuario
 userCtrol.renderProfile = async (req, res) => {
   const auth = getAuth(app);
   const user = auth.currentUser;
@@ -128,7 +127,6 @@ userCtrol.renderProfile = async (req, res) => {
       if (!querySnapshot.empty) {
         const userData = querySnapshot.docs[0].data();
 
-        // Obtiene la URL de descarga de la imagen
         let profileImageUrl = userData.profileImageUrl;
 
         if (profileImageUrl) {
@@ -137,32 +135,29 @@ userCtrol.renderProfile = async (req, res) => {
           profileImageUrl = await getDownloadURL(profileImageRef);
         }
 
-        // Pasa los datos del usuario a la vista
-        res.render('users/profile', { name: userData.name, email: userData.email, uid: user.uid, profileImageUrl });
+        // Renderiza la vista con los datos del usuario y la URL de la imagen
+        return res.render('users/profile', { name: userData.name, email: userData.email, uid: user.uid, profileImageUrl });
       } else {
         req.flash('error_msg', 'No se encontró información del usuario.');
-        res.redirect('/users/signin');
+        return res.redirect('/users/signin');
       }
     } catch (error) {
       console.error('Error al consultar Firestore:', error);
       req.flash('error_msg', 'Error al consultar Firestore');
-      res.redirect('/users/signin');
+      return res.redirect('/users/signin');
     }
   } else {
     req.flash('error_msg', 'Debes iniciar sesión para ver tu perfil.');
-    res.redirect('/users/signin');
+    return res.redirect('/users/signin');
   }
 };
+
 userCtrol.updateProfile = async (req, res) => {
   const auth = getAuth(app);
   const user = auth.currentUser;
 
   if (user) {
     const { name, email } = req.body;
-
-    // Mostrar información de depuración en la consola
-    debug('Req Files:', req.files);
-    debug('Req Body:', req.body);
 
     const firestore = getFirestore(app);
     const userRef = collection(firestore, 'users');
@@ -173,18 +168,12 @@ userCtrol.updateProfile = async (req, res) => {
 
       if (!querySnapshot.empty) {
         const userDocRef = querySnapshot.docs[0].ref;
-
-        // Obtener la información actual del usuario
         const userData = querySnapshot.docs[0].data();
-
-        // Guardar la URL actual de la imagen de perfil
         let profileImageUrl = userData.profileImageUrl;
 
-        // Verificar si se proporciona una nueva imagen de perfil
         if (req.files && req.files.profileImage) {
           const storage = getStorage(app);
 
-          // Eliminar la imagen de perfil anterior, si existe
           if (profileImageUrl) {
             const previousImageRef = ref(storage, profileImageUrl);
             try {
@@ -197,22 +186,14 @@ userCtrol.updateProfile = async (req, res) => {
             }
           }
 
-          // Subir la nueva imagen de perfil a Firebase Storage
           const profileImageRef = ref(storage, `Avatar/${Date.now()}_${req.files.profileImage[0].originalname}`);
-          
-          // Mostrar información de depuración en la consola
-          debug('Uploading profile image:', req.files.profileImage);
 
           try {
-            // Corrección: Utilizar req.files.profileImage[0].buffer
             await uploadBytes(profileImageRef, req.files.profileImage[0].buffer, {
-              contentType: req.files.profileImage[0].mimetype // Establecer el tipo de contenido
+              contentType: req.files.profileImage[0].mimetype
             });
 
-            // Obtener la URL de la nueva imagen
             profileImageUrl = await getDownloadURL(profileImageRef);
-
-            // Actualizar la URL de la imagen en Firestore
             await updateDoc(userDocRef, { profileImageUrl });
 
             debug('Profile image uploaded successfully!');
@@ -223,43 +204,34 @@ userCtrol.updateProfile = async (req, res) => {
           }
         }
 
-        // Actualizar la información del usuario en Firestore
         await updateDoc(userDocRef, {
           name: name,
-          email: email // Asegúrate de que el email pueda ser actualizado en tu configuración de Firebase
+          email: email
         });
 
-        // Actualizar el perfil de Firebase Auth, si es necesario
         await updateProfile(user, { displayName: name, email: email });
 
-        // Si el usuario no tiene una imagen de perfil, establecer una imagen predeterminada
         if (!profileImageUrl) {
-          // Puedes establecer la URL de una imagen predeterminada aquí
           profileImageUrl = '/imagenes/default-avatar.jpg';
           await updateDoc(userDocRef, { profileImageUrl });
         }
 
-        // Recargar los datos del usuario para actualizar el formulario
-        const updatedUserDoc = await getDoc(userDocRef);
-        const updatedUserData = updatedUserDoc.data();
-
         req.flash('success_msg', 'Perfil actualizado exitosamente');
-        // Renderizar la vista sin necesidad de redirección
-        return res.redirect('users/profile', { name: updatedUserData.name, email: updatedUserData.email, uid: user.uid, profileImageUrl });
+        // Cambio: En lugar de renderizar, redirige directamente con el mensaje
+        return res.redirect('/users/profile');
       } else {
         req.flash('error_msg', 'No se encontró información del usuario para actualizar.');
-        return res.redirect('/users/profile'); // Usa "return" para evitar enviar respuestas múltiples
+        return res.redirect('/users/profile');
       }
     } catch (error) {
       console.error('Error al actualizar el perfil:', error);
       req.flash('error_msg', 'Hubo un error al actualizar el perfil. Por favor, inténtalo de nuevo más tarde.');
-      return res.redirect('/users/profile'); // Usa "return" para evitar enviar respuestas múltiples
+      return res.redirect('/users/profile');
     }
   } else {
     req.flash('error_msg', 'Debes iniciar sesión para actualizar tu perfil.');
-    return res.redirect('/users/signin'); // Usa "return" para evitar enviar respuestas múltiples
+    return res.redirect('/users/signin');
   }
 };
-
 
 module.exports = userCtrol;
