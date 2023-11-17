@@ -72,16 +72,20 @@
                 
                 <div class="dropdown">
                     <button class="dropbtn">
-                        <img src="<%= profileImageUrl || '/imagenes/avatar.jpg' %>" alt="" id="profileImage" class="user">
-                        <% if (typeof name !== 'undefined') { %>
-<span class="userName"><%= name %></span>
-                        <% } %>
-                      </button>
+                      <img src="<%= profileImageUrl || '/imagenes/avatar.jpg' %>" alt="" id="profileImage" class="user">
+                      <% if (typeof name !== 'undefined') { %>
+                        <span class="userName">
+                          <%= name %>
+                          <ion-icon name="chevron-down-outline"></ion-icon>
+                        </span>
+                      <% } %>
+                    </button>
                     <div class="dropdown-content" id="dropdownContent">
                       <a href="/users/logout">Cerrar Sesión</a>
                       <a href="/users/profile">Perfil</a>
                     </div>
                   </div>
+                  
                   
                 </div>
                 
