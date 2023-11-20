@@ -29,6 +29,8 @@ const firebaseApp = require('./config/Conexion');
 
 const crudRouter = require('./routes/crud.routes');
 const usersRouter = require('./routes/users.routes');
+const CrudUsersRouter = require('./routes/Crud-Users.routes');
+
 
 
 app.use(logger('dev'));
@@ -45,6 +47,8 @@ app.set('view engine', 'ejs');
 
 app.use('/crud', crudRouter); 
 app.use('/users', usersRouter); 
+app.use('/Crud/Users', CrudUsersRouter);
+
 
 
 
