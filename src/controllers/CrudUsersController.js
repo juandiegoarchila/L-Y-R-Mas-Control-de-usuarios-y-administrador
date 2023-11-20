@@ -15,8 +15,13 @@ async function obtenerUsuariosDesdeFirestore() {
 // Función para obtener un usuario por su ID desde Firestore
 async function obtenerUsuarioPorId(id) {
   const usuarioDoc = await getDocs(query(collection(db, 'users'), where('id', '==', id)));
-  const usuario = usuarioDoc.docs[0].data();
-  return { id: usuarioDoc.docs[0].id, ...usuario };
+
+  if (usuarioDoc.docs.length > 0) {
+    const usuario = usuarioDoc.docs[0].data();
+    return { id: usuarioDoc.docs[0].id, ...usuario };
+  } else {
+    return null; // Retorna null si no se encuentra el usuario
+  }
 }
 
 // Función para crear un nuevo usuario en Firestore
@@ -53,13 +58,13 @@ CrudUsersController.formularioCrearUsuario = async function (req, res) {
   res.render('CrudUsers/crear');
 };
 
+// controllers/CrudUsersController.js
 CrudUsersController.crearUsuario = async function (req, res) {
   try {
     const nuevoUsuario = {
       nombre: req.body.nombre,
       email: req.body.email,
-      foto: req.body.foto,
-      // Agrega más campos según tus necesidades
+      // Otros campos según sea necesario
     };
 
     const idUsuario = await crearUsuarioEnFirestore(nuevoUsuario);
@@ -72,15 +77,26 @@ CrudUsersController.crearUsuario = async function (req, res) {
   }
 };
 
+
+
+
+// controllers/CrudUsersController.js
 CrudUsersController.formularioEditarUsuario = async function (req, res) {
   try {
     const usuario = await obtenerUsuarioPorId(req.params.id);
-    res.render('CrudUsers/editar', { usuario: usuario });
+
+    // Verifica si el usuario existe antes de renderizar la vista
+    if (usuario) {
+      res.render('CrudUsers/editar', { usuario: usuario });
+    } else {
+      res.status(404).send('Usuario no encontrado');
+    }
   } catch (error) {
     console.error('Error al obtener usuario para editar desde Firestore:', error);
     res.status(500).send('Error interno del servidor');
   }
 };
+
 
 CrudUsersController.editarUsuario = async function (req, res) {
   try {
@@ -102,17 +118,21 @@ CrudUsersController.editarUsuario = async function (req, res) {
   }
 };
 
+// controllers/CrudUsersController.js
 CrudUsersController.eliminarUsuario = async function (req, res) {
   try {
-    const idUsuario = req.params.id;
-    await eliminarUsuarioEnFirestore(idUsuario);
-    console.log('Usuario eliminado con ID:', idUsuario);
+      const idUsuario = req.params.id;
+      await eliminarUsuarioEnFirestore(idUsuario);
+      console.log('Usuario eliminado con ID:', idUsuario);
 
-    res.redirect('/Crud/Users/usuarios');
+      res.redirect('/Crud/Users/usuarios');
   } catch (error) {
-    console.error('Error al eliminar usuario en Firestore:', error);
-    res.status(500).send('Error interno del servidor');
+      console.error('Error al eliminar usuario en Firestore:', error);
+      res.status(500).send('Error interno del servidor');
   }
 };
+
+
+
 
 module.exports = CrudUsersController;

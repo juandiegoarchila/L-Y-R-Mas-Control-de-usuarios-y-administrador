@@ -38,7 +38,6 @@
                 <th>ID</th>
                 <th>Nombre</th>
                 <th>Email</th>
-                <th>Foto</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -46,18 +45,18 @@
             <% usuarios.forEach(usuario => { %>
                 <tr>
                     <td><%= usuario.id %></td>
-                    <td><%= usuario.name %></td>
+                    <td><%= usuario.nombre %></td>
                     <td><%= usuario.email %></td>
-                    <td><img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>"></td>
-
-                           <td>
-                        <a href="usuarios/editar/<%= usuario.id %>">Editar</a>
-                        <!-- Agrega el enlace o lógica para eliminar si es necesario -->
+                    <!-- Otros campos según sea necesario -->
+                    <td>
+                        <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
+                        <form action="/Crud/Users/usuarios/eliminar/<%= usuario.id %>" method="post">
+                            <input type="hidden" name="_method" value="delete">
+                            <button type="submit">Eliminar</button>
+                        </form>
                     </td>
                 </tr>
-                <% console.log(usuario); %> <!-- Agregado para imprimir información del usuario -->
             <% }); %>
-            
         </tbody>
     </table>
 </body>
