@@ -51,7 +51,7 @@
                     <td><img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>"></td>
                     <td>
                         <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
-                        <form action="/Crud/Users/usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">
+                        <form action="usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">
                             <!-- Usa ?_method=DELETE para simular el método DELETE -->
                             <button type="submit">Eliminar</button>
                         </form>

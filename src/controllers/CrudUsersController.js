@@ -1,8 +1,8 @@
-const { getFirestore, collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc } = require('firebase/firestore');
-  const { getAuth } = require('firebase/auth');
-  const app = require('../config/Conexion');
+const { getFirestore, collection, query, where, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc } = require('firebase/firestore');
+const { getAuth } = require('firebase/auth');
+const app = require('../config/Conexion');
 
-  const db = getFirestore(app);
+const db = getFirestore(app);
 
   // Función para obtener todos los usuarios desde Firestore
 // controllers/CrudUsersController.js
@@ -15,17 +15,30 @@ async function obtenerUsuariosDesdeFirestore() {
 
 
 // controllers/CrudUsersController.js
+// controllers/CrudUsersController.js
+// ...
 async function obtenerUsuarioPorId(id) {
+  console.log('ID recibido en obtenerUsuarioPorId:', id);
   const usuariosCollection = collection(db, 'users');
-  const usuarioDoc = await getDocs(query(usuariosCollection, where('id', '==', id)));
 
-  if (usuarioDoc.docs.length > 0) {
-    const usuario = usuarioDoc.docs[0].data();
-    return { id: usuarioDoc.docs[0].id, ...usuario };
-  } else {
-    return null; // Retorna null si no se encuentra el usuario
+  try {
+    const usuarioDoc = await getDoc(doc(usuariosCollection, id));
+
+    if (usuarioDoc.exists()) {
+      const usuario = usuarioDoc.data();
+      return { id: usuarioDoc.id, ...usuario };
+    } else {
+      console.error('Usuario no encontrado en obtenerUsuarioPorId');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error al obtener usuario por ID desde Firestore:', error);
+    throw error;
   }
 }
+
+
+
 
 
 
@@ -58,7 +71,6 @@ async function eliminarUsuarioEnFirestore(id) {
   CrudUsersController.indexUsuarios = async function (req, res) {
     try {
       const usuarios = await obtenerUsuariosDesdeFirestore();
-      console.log('Usuarios obtenidos desde Firestore:', usuarios);
       res.render('CrudUsers/index', { usuarios: usuarios });
     } catch (error) {
       console.error('Error al obtener usuarios desde Firestore:', error);
@@ -117,21 +129,21 @@ CrudUsersController.crearUsuario = async function (req, res) {
     try {
       const idUsuario = req.params.id;
       const nuevosDatosUsuario = {
-        nombre: req.body.nombre,
+        name: req.body.name,
         email: req.body.email,
-        foto: req.body.foto,
         // Agrega más campos según tus necesidades
       };
-
+  
       await editarUsuarioEnFirestore(idUsuario, nuevosDatosUsuario);
       console.log('Usuario editado con ID:', idUsuario);
-
+  
       res.redirect('/Crud/Users/usuarios');
     } catch (error) {
       console.error('Error al editar usuario en Firestore:', error);
       res.status(500).send('Error interno del servidor');
     }
   };
+  
 
   // controllers/CrudUsersController.js
   CrudUsersController.eliminarUsuario = async function (req, res) {

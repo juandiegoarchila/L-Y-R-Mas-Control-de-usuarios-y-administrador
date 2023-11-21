@@ -39,13 +39,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(methodOverride('_method'));
-// Agrega este middleware para imprimir la información de la solicitud
-app.use((req, res, next) => {
-  console.log('Request Method:', req.method);
-  console.log('Request URL:', req.url);
-  console.log('Request Body:', req.body);
-  next();
-});
+
 
 // Establece la carpeta de vistas y el motor de vistas EJS
 app.set('views', path.join(__dirname, 'views'));
