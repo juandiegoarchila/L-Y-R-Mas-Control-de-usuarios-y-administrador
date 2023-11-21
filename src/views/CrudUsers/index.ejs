@@ -38,6 +38,7 @@
                 <th>ID</th>
                 <th>Nombre</th>
                 <th>Email</th>
+                <th>Foto</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -45,18 +46,20 @@
             <% usuarios.forEach(usuario => { %>
                 <tr>
                     <td><%= usuario.id %></td>
-                    <td><%= usuario.nombre %></td>
+                    <td><%= usuario.name %></td>
                     <td><%= usuario.email %></td>
-                    <!-- Otros campos según sea necesario -->
+                    <td><img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>"></td>
+
                     <td>
                         <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
-                        <form action="/Crud/Users/usuarios/eliminar/<%= usuario.id %>" method="post">
-                            <input type="hidden" name="_method" value="delete">
+                        <form action="/Crud/Users/usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">
+                            <!-- Usa ?_method=DELETE para simular el método DELETE -->
                             <button type="submit">Eliminar</button>
                         </form>
                     </td>
                 </tr>
             <% }); %>
+            
         </tbody>
     </table>
 </body>

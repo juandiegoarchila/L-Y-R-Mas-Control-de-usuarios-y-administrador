@@ -6,10 +6,11 @@
 </head>
 <body>
     <h1>Editar Usuario</h1>
-    <form action="/Crud/Users/usuarios/editar/<%= usuario.id %>" method="post">
+    <form action="/Crud/Users/usuarios/editar/<%= usuario.id %>?_method=PUT" method="post">
         <!-- Utiliza el método HTTP POST para enviar el formulario -->
-        <label for="name">Nombre:</label>
-        <input type="text" id="name" name="nombre" value="<%= usuario.name %>" required>
+        <!-- Usa ?_method=PUT para simular el método PUT -->
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" value="<%= usuario.nombre %>" required>
 
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" value="<%= usuario.email %>" required>
