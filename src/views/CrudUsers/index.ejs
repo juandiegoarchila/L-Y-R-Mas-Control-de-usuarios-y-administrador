@@ -49,7 +49,6 @@
                     <td><%= usuario.name %></td>
                     <td><%= usuario.email %></td>
                     <td><img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>"></td>
-
                     <td>
                         <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
                         <form action="/Crud/Users/usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">

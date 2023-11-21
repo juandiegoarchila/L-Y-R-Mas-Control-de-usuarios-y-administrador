@@ -13,6 +13,7 @@ async function obtenerUsuariosDesdeFirestore() {
   return usuarios;
 }
 
+
 // controllers/CrudUsersController.js
 async function obtenerUsuarioPorId(id) {
   const usuariosCollection = collection(db, 'users');
@@ -27,12 +28,14 @@ async function obtenerUsuarioPorId(id) {
 }
 
 
+
   
+
 
 // controllers/CrudUsersController.js
 async function crearUsuarioEnFirestore(usuario) {
-  const { nombre, email } = usuario;
-  const docRef = await addDoc(collection(db, 'users'), { nombre, email });
+  const { name, email } = usuario;
+  const docRef = await addDoc(collection(db, 'users'), { name, email });
   return docRef.id;
 }
 
@@ -55,35 +58,39 @@ async function eliminarUsuarioEnFirestore(id) {
   CrudUsersController.indexUsuarios = async function (req, res) {
     try {
       const usuarios = await obtenerUsuariosDesdeFirestore();
+      console.log('Usuarios obtenidos desde Firestore:', usuarios);
       res.render('CrudUsers/index', { usuarios: usuarios });
     } catch (error) {
       console.error('Error al obtener usuarios desde Firestore:', error);
       res.status(500).send('Error interno del servidor');
     }
   };
+  
+  
 
   CrudUsersController.formularioCrearUsuario = async function (req, res) {
     res.render('CrudUsers/crear');
   };
 
-  // controllers/CrudUsersController.js
-  CrudUsersController.crearUsuario = async function (req, res) {
-    try {
-      const nuevoUsuario = {
-        nombre: req.body.nombre,
-        email: req.body.email,
-        // Otros campos según sea necesario
-      };
+// controllers/CrudUsersController.js
+CrudUsersController.crearUsuario = async function (req, res) {
+  try {
+    const nuevoUsuario = {
+      name: req.body.name,
+      email: req.body.email,
+      // Otros campos según sea necesario
+    };
 
-      const idUsuario = await crearUsuarioEnFirestore(nuevoUsuario);
-      console.log('Nuevo usuario creado con ID:', idUsuario);
+    const idUsuario = await crearUsuarioEnFirestore(nuevoUsuario);
+    console.log('Nuevo usuario creado con ID:', idUsuario);
 
-      res.redirect('/Crud/Users/usuarios');
-    } catch (error) {
-      console.error('Error al crear usuario en Firestore:', error);
-      res.status(500).send('Error interno del servidor');
-    }
-  };
+    res.redirect('/Crud/Users/usuarios');
+  } catch (error) {
+    console.error('Error al crear usuario en Firestore:', error);
+    res.status(500).send('Error interno del servidor');
+  }
+};
+
 
 
 
