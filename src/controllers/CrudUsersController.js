@@ -39,7 +39,10 @@ async function obtenerUsuarioPorId(id) {
 
 
 
-
+async function editarUsuarioEnFirestore(id, nuevosDatosUsuario) {
+  const usuarioRef = doc(db, 'users', id);
+  await updateDoc(usuarioRef, nuevosDatosUsuario);
+}
 
 
   
