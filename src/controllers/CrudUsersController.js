@@ -4,13 +4,11 @@ const app = require('../config/Conexion');
 
 const db = getFirestore(app);
 
-  // Función para obtener todos los usuarios desde Firestore
-// controllers/CrudUsersController.js
 async function obtenerUsuariosDesdeFirestore() {
   const usuariosCollection = collection(db, 'users');
   const usuariosSnapshot = await getDocs(usuariosCollection);
   const usuarios = usuariosSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  return usuarios;
+  return usuarios.map((usuario, index) => ({ ...usuario, index: index + 1 }));
 }
 
 

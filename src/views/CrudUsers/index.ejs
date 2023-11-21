@@ -7,6 +7,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Usuarios</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            background-color: #333;
+            color: white;
+            padding: 15px;
+            margin: 0;
+            border-radius: 8px 8px 0 0;
+            text-align: left; /* Alinear texto a la izquierda */
+        }
+
+        hr {
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -15,8 +46,8 @@
 
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
+            padding: 12px;
+            text-align: center; /* Centrar texto */
         }
 
         th {
@@ -26,40 +57,81 @@
         img {
             max-width: 50px;
             max-height: 50px;
+            border-radius: 50%;
         }
+
+        tbody tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+
+        a, button {
+            padding: 8px 12px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            color: white;
+            border-radius: 4px;
+        }
+
+        a {
+            background-color: #4CAF50;
+            margin-right: 10px;
+        }
+
+        button {
+            background-color: #f44336;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: inline-block;
+            float: right;
+        }
+
+        .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        align-items: center; /* Centra verticalmente los elementos */
+    }
+
     </style>
 </head>
 <body>
-    <h1>Lista de Usuarios</h1>
-    <a href="usuarios/crear">Crear Usuario</a>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Email</th>
-                <th>Foto</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% usuarios.forEach(usuario => { %>
+    <div class="container">
+        <h1>Lista de Usuarios</h1>
+        <hr>
+        <input type="text" id="search" placeholder="Buscar por nombre...">
+        <a href="usuarios/crear">Crear Usuario</a>
+        <table>
+            <thead>
                 <tr>
-                    <td><%= usuario.id %></td>
-                    <td><%= usuario.name %></td>
-                    <td><%= usuario.email %></td>
-                    <td><img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>"></td>
-                    <td>
-                        <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
-                        <form action="usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">
-                            <!-- Usa ?_method=DELETE para simular el método DELETE -->
-                            <button type="submit">Eliminar</button>
-                        </form>
-                    </td>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Foto</th>
+                    <th>Acciones</th>
                 </tr>
-            <% }); %>
-            
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <% usuarios.forEach(usuario => { %>
+                    <tr>
+                        <td><%= usuario.index %></td>
+                        <td><%= usuario.name %></td>
+                        <td><%= usuario.email %></td>
+                        <td><img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>"></td>
+                        <td class="action-buttons">
+                            <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
+                            <form action="usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">
+                                <button type="submit">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
