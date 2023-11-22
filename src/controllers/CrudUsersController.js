@@ -69,16 +69,32 @@ async function eliminarUsuarioEnFirestore(id) {
 
   const CrudUsersController = {};
 
-  CrudUsersController.indexUsuarios = async function (req, res) {
-    try {
-      const usuarios = await obtenerUsuariosDesdeFirestore();
-      res.render('CrudUsers/index', { usuarios: usuarios });
-    } catch (error) {
-      console.error('Error al obtener usuarios desde Firestore:', error);
-      res.status(500).send('Error interno del servidor');
-    }
-  };
-  
+// controllers/CrudUsersController.js
+CrudUsersController.indexUsuarios = async function (req, res) {
+  try {
+    const page = parseInt(req.query.page) || 1; // Obtén el número de página de la solicitud o usa 1 por defecto
+    const itemsPerPage = 1; // Número de usuarios por página
+
+    const usuarios = await obtenerUsuariosDesdeFirestore();
+    const totalUsuarios = usuarios.length;
+    const totalPages = Math.ceil(totalUsuarios / itemsPerPage);
+
+    // Obtén solo los usuarios para la página actual
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const usuariosPaginados = usuarios.slice(startIndex, endIndex);
+
+    res.render('CrudUsers/index', {
+      usuarios: usuariosPaginados,
+      currentPage: page,
+      totalPages: totalPages,
+    });
+  } catch (error) {
+    console.error('Error al obtener usuarios desde Firestore:', error);
+    res.status(500).send('Error interno del servidor');
+  }
+};
+
   
 
   CrudUsersController.formularioCrearUsuario = async function (req, res) {

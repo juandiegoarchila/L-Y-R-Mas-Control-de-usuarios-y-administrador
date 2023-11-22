@@ -1,6 +1,7 @@
-<!-- views/CrudUsers/indexUsuarios.ejs -->
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -22,15 +23,14 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
+            position: relative;
+            margin-top: 70px;
         }
 
         h1 {
-            background-color: #333;
-            color: white;
-            padding: 15px;
-            margin: 0;
             border-radius: 8px 8px 0 0;
-            text-align: left; /* Alinear texto a la izquierda */
+            text-align: left;
+            font-size: 15px;
         }
 
         hr {
@@ -44,10 +44,11 @@
             margin-top: 20px;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 12px;
-            text-align: center; /* Centrar texto */
+            text-align: center;
         }
 
         th {
@@ -64,13 +65,15 @@
             background-color: #f5f5f5;
         }
 
-        a, button {
+        a,
+        button {
             padding: 8px 12px;
             text-decoration: none;
             cursor: pointer;
             border: none;
             color: white;
             border-radius: 4px;
+            display: inline-block;
         }
 
         a {
@@ -91,47 +94,137 @@
             float: right;
         }
 
-        .action-buttons {
-        display: flex;
-        justify-content: space-between;
-        align-items: center; /* Centra verticalmente los elementos */
-    }
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        table {
+            min-width: 500px;
+        }
+
+        .create-user-link {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-decoration: none;
+            position: absolute;
+            top: 18px;
+            right: 20px;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pagination-info {
+            margin-left: 10px;
+        }
+
+        .page-numbers {
+            display: flex;
+            align-items: center;
+        }
+
+        .page-number {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        .page-number:hover {
+            background-color: #45a049;
+        }
+.hidden {
+    display: none;
+}
+        /* Agrega esto a tu sección de estilos CSS */
+.page-number.active {
+  background-color: #45a049;
+}
 
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Lista de Usuarios</h1>
+        <a href="usuarios/crear" class="create-user-link">Crear Usuario</a>
         <hr>
-        <input type="text" id="search" placeholder="Buscar por nombre...">
-        <a href="usuarios/crear">Crear Usuario</a>
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Foto</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% usuarios.forEach(usuario => { %>
+
+        <div class="table-container">
+            <table>
+                <input type="text" id="search" placeholder="Buscar por nombre...">
+
+                <thead>
                     <tr>
-                        <td><%= usuario.index %></td>
-                        <td><%= usuario.name %></td>
-                        <td><%= usuario.email %></td>
-                        <td><img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>"></td>
-                        <td class="action-buttons">
-                            <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
-                            <form action="usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">
-                                <button type="submit">Eliminar</button>
-                            </form>
-                        </td>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Foto</th>
+                        <th>Acciones</th>
                     </tr>
-                <% }); %>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <% usuarios.forEach(usuario => { %>
+                        <tr>
+                            <td><%= usuario.index %></td>
+                            <td><%= usuario.name %></td>
+                            <td><%= usuario.email %></td>
+                            <td><img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>"></td>
+                            <td class="action-buttons">
+                                <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
+                                <form action="usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">
+                                    <button type="submit">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+
+       <!-- En la sección de la paginación -->
+<!-- ... (tu código HTML existente) ... -->
+<div class="pagination">
+    <div class="pagination-info">
+      <span>Mostrando:</span>
+      <span id="pagination-info">Página <%= currentPage %> de <%= totalPages %>.</span>
     </div>
+    <div class="page-numbers">
+      <% const pageGroupSize = 3; %>
+      <% const startPage = Math.max(1, currentPage - Math.floor(pageGroupSize / 2)); %>
+      <% const endPage = Math.min(startPage + pageGroupSize - 1, totalPages); %>
+    
+      <a href="?page=<%= currentPage - 1 %>" class="page-number <%= currentPage === 1 ? 'disabled hidden' : '' %>">&lt;</a>
+      <% for (let i = startPage; i <= endPage; i++) { %>
+        <a href="?page=<%= i %>" class="page-number <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+      <% } %>
+      <% const hasNextPage = currentPage < totalPages; %>
+      <a href="<%= hasNextPage ? `?page=${currentPage + 1}` : '#' %>" class="page-number <%= !hasNextPage ? 'disabled hidden' : '' %>">&gt;</a>
+    </div>
+  </div>
+
+
+
+</div>
+    
 </body>
+
 </html>
+
+  
+    </div>
+    
+</body>
+
+</html>
+```
+
