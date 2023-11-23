@@ -160,12 +160,14 @@
 
         <!-- Agrega este formulario antes de tu tabla -->
         <form id="searchForm" action="/Crud/Users/usuarios" method="GET">
-            <input type="text" name="search" id="search" placeholder="Buscar por nombre o email..." value="<%= search || '' %>">
+            <input type="text" name="search" id="search" placeholder="Buscar por nombre o email..."
+                value="<%= search || '' %>">
             <button type="submit">Buscar</button>
         </form>
 
         <div class="table-container">
-            <table>
+            <!-- Contenedor de la tabla que se actualizará -->
+            <table id="userTable">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -216,9 +218,9 @@
                     class="page-number <%= !hasNextPage ? 'disabled hidden' : '' %>">&gt;</a>
             </div>
         </div>
-
     </div>
 
+    <!-- Script para la funcionalidad de búsqueda -->
    <!-- Script para la funcionalidad de búsqueda -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
@@ -235,8 +237,17 @@
                 url: '/Crud/Users/usuarios',
                 data: { search: searchTerm },
                 success: function (data) {
-                    // Actualizar la tabla con los resultados recibidos del servidor
-                    $('.table-container').html(data);
+                    // Actualizar solo la tabla y la información de paginación
+                    const container = document.createElement('div');
+                    container.innerHTML = data;
+
+                    const newTable = container.querySelector('#userTable');
+                    const newPagination = container.querySelector('.pagination');
+
+                    // Reemplazar el contenido de la tabla existente con el nuevo
+                    $('#userTable').replaceWith(newTable);
+                    // Reemplazar el contenido de la paginación existente con el nuevo
+                    $('.pagination').replaceWith(newPagination);
                 },
                 error: function (error) {
                     console.error('Error en la solicitud AJAX:', error);
@@ -249,8 +260,3 @@
 </body>
 
 </html>
-
-
-
-
-
