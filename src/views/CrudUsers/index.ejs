@@ -162,7 +162,6 @@
         <form id="searchForm" action="/Crud/Users/usuarios" method="GET">
             <input type="text" name="search" id="search" placeholder="Buscar por nombre o email..."
                 value="<%= search || '' %>">
-            <button type="submit">Buscar</button>
         </form>
 
         <div class="table-container">
@@ -221,42 +220,40 @@
     </div>
 
     <!-- Script para la funcionalidad de búsqueda -->
-   <!-- Script para la funcionalidad de búsqueda -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-    $(document).ready(function () {
-        const searchInput = document.getElementById('search');
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            const searchInput = document.getElementById('search');
 
-        searchInput.addEventListener('input', function () {
-            const searchTerm = searchInput.value.toLowerCase();
-            console.log('Término de búsqueda:', searchTerm);
+            searchInput.addEventListener('input', function () {
+                const searchTerm = searchInput.value.toLowerCase();
+                console.log('Término de búsqueda:', searchTerm);
 
-            // Utilizar AJAX para enviar la solicitud de búsqueda al servidor
-            $.ajax({
-                type: 'GET',
-                url: '/Crud/Users/usuarios',
-                data: { search: searchTerm },
-                success: function (data) {
-                    // Actualizar solo la tabla y la información de paginación
-                    const container = document.createElement('div');
-                    container.innerHTML = data;
+                // Utilizar AJAX para enviar la solicitud de búsqueda al servidor
+                $.ajax({
+                    type: 'GET',
+                    url: '/Crud/Users/usuarios',
+                    data: { search: searchTerm },
+                    success: function (data) {
+                        // Actualizar solo la tabla y la información de paginación
+                        const container = document.createElement('div');
+                        container.innerHTML = data;
 
-                    const newTable = container.querySelector('#userTable');
-                    const newPagination = container.querySelector('.pagination');
+                        const newTable = container.querySelector('#userTable');
+                        const newPagination = container.querySelector('.pagination');
 
-                    // Reemplazar el contenido de la tabla existente con el nuevo
-                    $('#userTable').replaceWith(newTable);
-                    // Reemplazar el contenido de la paginación existente con el nuevo
-                    $('.pagination').replaceWith(newPagination);
-                },
-                error: function (error) {
-                    console.error('Error en la solicitud AJAX:', error);
-                }
+                        // Reemplazar el contenido de la tabla existente con el nuevo
+                        $('#userTable').replaceWith(newTable);
+                        // Reemplazar el contenido de la paginación existente con el nuevo
+                        $('.pagination').replaceWith(newPagination);
+                    },
+                    error: function (error) {
+                        console.error('Error en la solicitud AJAX:', error);
+                    }
+                });
             });
         });
-    });
-</script>
-
+    </script>
 </body>
 
 </html>
