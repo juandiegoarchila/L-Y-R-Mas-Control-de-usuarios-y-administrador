@@ -219,50 +219,33 @@
 
     </div>
 
-    <!-- Script para la funcionalidad de búsqueda -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script>
-        $(document).ready(function () {
-            $('#searchForm').submit(function (event) {
-                event.preventDefault();
-                const searchTerm = $('#search').val().toLowerCase();
-                window.location.href = '/Crud/Users/usuarios?search=' + searchTerm;
-            });
-        });
+   <!-- Script para la funcionalidad de búsqueda -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const searchInput = document.getElementById('search');
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const searchInput = document.getElementById('search');
+        searchInput.addEventListener('input', function () {
+            const searchTerm = searchInput.value.toLowerCase();
+            console.log('Término de búsqueda:', searchTerm);
 
-            searchInput.addEventListener('input', function () {
-                const searchTerm = searchInput.value.toLowerCase();
-                console.log('Término de búsqueda:', searchTerm);
-                filterUsers(searchTerm);
-            });
-        });
-
-        function filterUsers(searchTerm) {
-            const rows = document.querySelectorAll('tbody tr');
-
-            rows.forEach(row => {
-                const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                const email = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
-
-                const nameWords = name.split(' ');
-                const emailWords = email.split(' ');
-
-                const searchTermWords = searchTerm.split(' ');
-
-                const nameMatch = searchTermWords.every(word => nameWords.some(nameWord => nameWord.includes(word)));
-                const emailMatch = searchTermWords.every(word => emailWords.some(emailWord => emailWord.includes(word)));
-
-                if (nameMatch || emailMatch) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
+            // Utilizar AJAX para enviar la solicitud de búsqueda al servidor
+            $.ajax({
+                type: 'GET',
+                url: '/Crud/Users/usuarios',
+                data: { search: searchTerm },
+                success: function (data) {
+                    // Actualizar la tabla con los resultados recibidos del servidor
+                    $('.table-container').html(data);
+                },
+                error: function (error) {
+                    console.error('Error en la solicitud AJAX:', error);
                 }
             });
-        }
-    </script>
+        });
+    });
+</script>
+
 </body>
 
 </html>
