@@ -93,6 +93,15 @@
             float: right;
         }
 
+        select {
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: inline-block;
+            float: right;
+        }
+
         .table-container {
             overflow-x: auto;
             width: 100%;
@@ -149,6 +158,18 @@
         .page-number.active {
             background-color: #45a049;
         }
+        /* Estilos originales aquí ... */
+
+/* Estilos para hacer el formulario de búsqueda responsive */
+@media screen and (max-width: 600px) {
+    input[type="text"],
+    select {
+        width: 100%;
+        margin-bottom: 10px;
+        float: none;
+    }
+}
+
     </style>
 </head>
 
@@ -159,45 +180,65 @@
         <hr>
 
         <!-- Agrega este formulario antes de tu tabla -->
-        <form id="searchForm" action="/Crud/Users/usuarios" method="GET">
-            <input type="text" name="search" id="search" placeholder="Buscar por nombre o email..."
-                value="<%= search || '' %>">
-        </form>
+       <!-- Agrega este formulario antes de tu tabla -->
+<form id="searchForm" action="/Crud/Users/usuarios" method="GET" style="display: flex; justify-content: space-between; align-items: center;">
+    <!-- Agregamos el elemento select para seleccionar la cantidad de entradas a mostrar -->
+    <div style="display: flex; align-items: center;">
+        <label for="entries" style="margin-right: 5px;">Mostrar:</label>
+        <select id="entries" name="entries" onchange="updateTable(this.value)">
+            <option value="5" <%= itemsPerPage === 5 ? 'selected' : '' %>>5</option>
+            <option value="15" <%= itemsPerPage === 15 ? 'selected' : '' %>>15</option>
+            <option value="20" <%= itemsPerPage === 20 ? 'selected' : '' %>>20</option>
+            <!-- Puedes agregar más opciones según sea necesario -->
+        </select>
+    </div>
+
+    <div style="display: flex; align-items: center;">
+        <input type="text" name="search" id="search" placeholder="Buscar por nombre o email..."
+            value="<%= search || '' %>">
+    </div>
+</form>
+
 
         <div class="table-container">
-        <!-- Contenedor de la tabla que se actualizará -->
-<table id="userTable">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Foto</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <% let userCount = (currentPage - 1) * itemsPerPage + 1; %>
-        <% usuarios.forEach(usuario => { %>
-            <tr>
-                <td><%= userCount++ %></td>
-                <td><%= usuario.name %></td>
-                <td><%= usuario.email %></td>
-                <td><img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>"></td>
-                <td class="action-buttons">
-                    <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
-                    <form action="usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">
-                        <button type="submit">Eliminar</button>
-                    </form>
-                </td>
-            </tr>
-        <% }); %>
-    </tbody>
-</table>
-
+            <!-- Contenedor de la tabla que se actualizará -->
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Foto</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% let userCount = (currentPage - 1) * itemsPerPage + 1; %>
+                    <% usuarios.forEach(usuario => { %>
+                        <tr>
+                            <td><%= userCount++ %></td>
+                            <td><%= usuario.name %></td>
+                            <td><%= usuario.email %></td>
+                            <td>
+                                <% if (usuario.profileImageUrl) { %>
+                                <img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>">
+                                <% } else { %>
+                                <!-- Mostrar imagen predeterminada si no hay imagen de perfil -->
+                                <img src="/imagenes/avatar.jpg" alt="Foto predeterminada">
+                                <% } %>
+                            </td>
+                            <td class="action-buttons">
+                                <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
+                                <form action="usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">
+                                    <button type="submit">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
         </div>
 
-        <!-- Sección de paginación aquí -->
         <div class="pagination">
             <div class="pagination-info">
                 <span>Mostrando:</span>
@@ -207,7 +248,7 @@
                 <% const pageGroupSize = 3; %>
                 <% const startPage = Math.max(1, currentPage - Math.floor(pageGroupSize / 2)); %>
                 <% const endPage = Math.min(startPage + pageGroupSize - 1, totalPages); %>
-
+        
                 <a href="?page=<%= currentPage - 1 %>"
                     class="page-number <%= currentPage === 1 ? 'disabled hidden' : '' %>">&lt;</a>
                 <% for (let i = startPage; i <= endPage; i++) { %>
@@ -221,16 +262,16 @@
         </div>
     </div>
 
-    <!-- Script para la funcionalidad de búsqueda -->
+    <!-- Script para la funcionalidad de búsqueda y selección de entradas -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
             const searchInput = document.getElementById('search');
-
+    
             searchInput.addEventListener('input', function () {
                 const searchTerm = searchInput.value.toLowerCase();
                 console.log('Término de búsqueda:', searchTerm);
-
+    
                 // Utilizar AJAX para enviar la solicitud de búsqueda al servidor
                 $.ajax({
                     type: 'GET',
@@ -240,10 +281,10 @@
                         // Actualizar solo la tabla y la información de paginación
                         const container = document.createElement('div');
                         container.innerHTML = data;
-
+    
                         const newTable = container.querySelector('#userTable');
                         const newPagination = container.querySelector('.pagination');
-
+    
                         // Reemplazar el contenido de la tabla existente con el nuevo
                         $('#userTable').replaceWith(newTable);
                         // Reemplazar el contenido de la paginación existente con el nuevo
@@ -255,6 +296,33 @@
                 });
             });
         });
+    
+        // Función para actualizar la cantidad de entradas a mostrar
+        function updateTable(entries) {
+            // Utilizar AJAX para enviar la solicitud al servidor con la nueva cantidad de entradas
+            $.ajax({
+                type: 'GET',
+                url: '/Crud/Users/usuarios',
+                data: { entries: entries }, // Ajustar los nombres de parámetros según sea necesario
+                success: function (data) {
+                    // Actualizar solo la tabla y la información de paginación
+                    const container = document.createElement('div');
+                    container.innerHTML = data;
+    
+                    const newTable = container.querySelector('#userTable');
+                    const newPagination = container.querySelector('.pagination');
+    
+                    // Reemplazar el contenido de la tabla existente con el nuevo
+                    $('#userTable').replaceWith(newTable);
+                    // Reemplazar el contenido de la paginación existente con el nuevo
+                    $('.pagination').replaceWith(newPagination);
+                },
+                error: function (error) {
+                    console.error('Error en la solicitud AJAX:', error);
+                }
+            });
+        }
+        
     </script>
 </body>
 

@@ -87,21 +87,21 @@ CrudUsersController.indexUsuarios = async function (req, res) {
     const searchTerm = req.query.search ? req.query.search.toLowerCase() : '';
     const usuarios = await obtenerUsuariosDesdeFirestore();
 
-    // Filtrar y ordenar usuarios por término de búsqueda y orden de creación
     const usuariosFiltrados = usuarios
       .filter((usuario) => {
         const name = usuario.name.toLowerCase();
         const email = usuario.email.toLowerCase();
         return name.includes(searchTerm) || email.includes(searchTerm);
       })
-      .sort((a, b) => a.originalIndex - b.originalIndex); // Ordenar por índice original
+      .sort((a, b) => a.originalIndex - b.originalIndex);
 
-    // Aplicar paginación a los resultados filtrados
-    const page = parseInt(req.query.page) || 1;
-    const itemsPerPage = 3;
+    // Obtener el valor seleccionado del menú desplegable (por defecto 5)
+    const itemsPerPage = parseInt(req.query.entries) || 5;
+
     const totalUsuariosFiltrados = usuariosFiltrados.length;
     const totalPages = Math.ceil(totalUsuariosFiltrados / itemsPerPage);
 
+    const page = parseInt(req.query.page) || 1;
     const startIndex = (page - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const usuariosPaginados = usuariosFiltrados.slice(startIndex, endIndex);
@@ -118,7 +118,6 @@ CrudUsersController.indexUsuarios = async function (req, res) {
     res.status(500).send('Error interno del servidor');
   }
 };
-
 
 CrudUsersController.formularioCrearUsuario = async function (req, res) {
   res.render('CrudUsers/crear');
