@@ -142,14 +142,14 @@
         .page-number:hover {
             background-color: #45a049;
         }
-.hidden {
-    display: none;
-}
-        /* Agrega esto a tu sección de estilos CSS */
-.page-number.active {
-  background-color: #45a049;
-}
 
+        .hidden {
+            display: none;
+        }
+
+        .page-number.active {
+            background-color: #45a049;
+        }
     </style>
 </head>
 
@@ -161,7 +161,7 @@
 
         <div class="table-container">
             <table>
-                <input type="text" id="search" placeholder="Buscar por nombre...">
+                <input type="text" id="search" placeholder="Buscar por nombre o email...">
 
                 <thead>
                     <tr>
@@ -191,40 +191,59 @@
             </table>
         </div>
 
-       <!-- En la sección de la paginación -->
-<!-- ... (tu código HTML existente) ... -->
+<!-- Sección de paginación aquí -->
 <div class="pagination">
     <div class="pagination-info">
-      <span>Mostrando:</span>
-      <span id="pagination-info">Página <%= currentPage %> de <%= totalPages %>.</span>
+        <span>Mostrando:</span>
+        <span id="pagination-info">Página <%= currentPage %> de <%= totalPages %>.</span>
     </div>
     <div class="page-numbers">
-      <% const pageGroupSize = 3; %>
-      <% const startPage = Math.max(1, currentPage - Math.floor(pageGroupSize / 2)); %>
-      <% const endPage = Math.min(startPage + pageGroupSize - 1, totalPages); %>
-    
-      <a href="?page=<%= currentPage - 1 %>" class="page-number <%= currentPage === 1 ? 'disabled hidden' : '' %>">&lt;</a>
-      <% for (let i = startPage; i <= endPage; i++) { %>
-        <a href="?page=<%= i %>" class="page-number <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
-      <% } %>
-      <% const hasNextPage = currentPage < totalPages; %>
-      <a href="<%= hasNextPage ? `?page=${currentPage + 1}` : '#' %>" class="page-number <%= !hasNextPage ? 'disabled hidden' : '' %>">&gt;</a>
+        <% const pageGroupSize = 3; %>
+        <% const startPage = Math.max(1, currentPage - Math.floor(pageGroupSize / 2)); %>
+        <% const endPage = Math.min(startPage + pageGroupSize - 1, totalPages); %>
+
+        <a href="?page=<%= currentPage - 1 %>"
+            class="page-number <%= currentPage === 1 ? 'disabled hidden' : '' %>">&lt;</a>
+        <% for (let i = startPage; i <= endPage; i++) { %>
+            <a href="?page=<%= i %>"
+                class="page-number <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+        <% } %>
+        <% const hasNextPage = currentPage < totalPages; %>
+        <a href="<%= hasNextPage ? `?page=${currentPage + 1}` : '#' %>"
+            class="page-number <%= !hasNextPage ? 'disabled hidden' : '' %>">&gt;</a>
     </div>
-  </div>
-
-
-
 </div>
-    
-</body>
 
-</html>
-
-  
     </div>
-    
+
+    <!-- Script para la funcionalidad de búsqueda -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('search');
+
+            searchInput.addEventListener('input', function () {
+                const searchTerm = searchInput.value.toLowerCase();
+                filterUsers(searchTerm);
+            });
+        });
+
+        function filterUsers(searchTerm) {
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const email = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+
+                if (name.includes(searchTerm) || email.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>
-```
+
 
