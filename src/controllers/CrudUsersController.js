@@ -76,30 +76,41 @@ const CrudUsersController = {};
 
 CrudUsersController.indexUsuarios = async function (req, res) {
   try {
+    const searchTerm = req.query.search ? req.query.search.toLowerCase() : '';
+
+    // Obtener todos los usuarios desde Firestore
+    const usuarios = await obtenerUsuariosDesdeFirestore();
+
+    // Filtrar usuarios por término de búsqueda
+    const usuariosFiltrados = usuarios.filter(usuario => {
+      const name = usuario.name.toLowerCase();
+      const email = usuario.email.toLowerCase();
+      return name.includes(searchTerm) || email.includes(searchTerm);
+    });
+
+    // Aplicar paginación a los resultados filtrados
     const page = parseInt(req.query.page) || 1;
     const itemsPerPage = 2;
-
-    const usuarios = req.query.search
-      ? await buscarUsuariosEnFirestore(req.query.search)
-      : await obtenerUsuariosDesdeFirestore();
-
-    const totalUsuarios = usuarios.length;
-    const totalPages = Math.ceil(totalUsuarios / itemsPerPage);
+    const totalUsuariosFiltrados = usuariosFiltrados.length;
+    const totalPages = Math.ceil(totalUsuariosFiltrados / itemsPerPage);
 
     const startIndex = (page - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const usuariosPaginados = usuarios.slice(startIndex, endIndex);
+    const usuariosPaginados = usuariosFiltrados.slice(startIndex, endIndex);
 
     res.render('CrudUsers/index', {
       usuarios: usuariosPaginados,
       currentPage: page,
       totalPages: totalPages,
+      search: req.query.search,
     });
   } catch (error) {
     console.error('Error al obtener usuarios desde Firestore:', error);
     res.status(500).send('Error interno del servidor');
   }
 };
+
+
 
 CrudUsersController.formularioCrearUsuario = async function (req, res) {
   res.render('CrudUsers/crear');

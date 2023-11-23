@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -159,10 +158,14 @@
         <a href="usuarios/crear" class="create-user-link">Crear Usuario</a>
         <hr>
 
+        <!-- Agrega este formulario antes de tu tabla -->
+        <form id="searchForm" action="/Crud/Users/usuarios" method="GET">
+            <input type="text" name="search" id="search" placeholder="Buscar por nombre o email..." value="<%= search || '' %>">
+            <button type="submit">Buscar</button>
+        </form>
+
         <div class="table-container">
             <table>
-                <input type="text" id="search" placeholder="Buscar por nombre o email...">
-
                 <thead>
                     <tr>
                         <th>#</th>
@@ -191,38 +194,48 @@
             </table>
         </div>
 
-<!-- Sección de paginación aquí -->
-<div class="pagination">
-    <div class="pagination-info">
-        <span>Mostrando:</span>
-        <span id="pagination-info">Página <%= currentPage %> de <%= totalPages %>.</span>
-    </div>
-    <div class="page-numbers">
-        <% const pageGroupSize = 3; %>
-        <% const startPage = Math.max(1, currentPage - Math.floor(pageGroupSize / 2)); %>
-        <% const endPage = Math.min(startPage + pageGroupSize - 1, totalPages); %>
+        <!-- Sección de paginación aquí -->
+        <div class="pagination">
+            <div class="pagination-info">
+                <span>Mostrando:</span>
+                <span id="pagination-info">Página <%= currentPage %> de <%= totalPages %>.</span>
+            </div>
+            <div class="page-numbers">
+                <% const pageGroupSize = 3; %>
+                <% const startPage = Math.max(1, currentPage - Math.floor(pageGroupSize / 2)); %>
+                <% const endPage = Math.min(startPage + pageGroupSize - 1, totalPages); %>
 
-        <a href="?page=<%= currentPage - 1 %>"
-            class="page-number <%= currentPage === 1 ? 'disabled hidden' : '' %>">&lt;</a>
-        <% for (let i = startPage; i <= endPage; i++) { %>
-            <a href="?page=<%= i %>"
-                class="page-number <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
-        <% } %>
-        <% const hasNextPage = currentPage < totalPages; %>
-        <a href="<%= hasNextPage ? `?page=${currentPage + 1}` : '#' %>"
-            class="page-number <%= !hasNextPage ? 'disabled hidden' : '' %>">&gt;</a>
-    </div>
-</div>
+                <a href="?page=<%= currentPage - 1 %>"
+                    class="page-number <%= currentPage === 1 ? 'disabled hidden' : '' %>">&lt;</a>
+                <% for (let i = startPage; i <= endPage; i++) { %>
+                    <a href="?page=<%= i %>"
+                        class="page-number <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+                <% } %>
+                <% const hasNextPage = currentPage < totalPages; %>
+                <a href="<%= hasNextPage ? `?page=${currentPage + 1}` : '#' %>"
+                    class="page-number <%= !hasNextPage ? 'disabled hidden' : '' %>">&gt;</a>
+            </div>
+        </div>
 
     </div>
 
     <!-- Script para la funcionalidad de búsqueda -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+        $(document).ready(function () {
+            $('#searchForm').submit(function (event) {
+                event.preventDefault();
+                const searchTerm = $('#search').val().toLowerCase();
+                window.location.href = '/Crud/Users/usuarios?search=' + searchTerm;
+            });
+        });
+
         document.addEventListener('DOMContentLoaded', function () {
             const searchInput = document.getElementById('search');
 
             searchInput.addEventListener('input', function () {
                 const searchTerm = searchInput.value.toLowerCase();
+                console.log('Término de búsqueda:', searchTerm);
                 filterUsers(searchTerm);
             });
         });
@@ -234,7 +247,15 @@
                 const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
                 const email = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
 
-                if (name.includes(searchTerm) || email.includes(searchTerm)) {
+                const nameWords = name.split(' ');
+                const emailWords = email.split(' ');
+
+                const searchTermWords = searchTerm.split(' ');
+
+                const nameMatch = searchTermWords.every(word => nameWords.some(nameWord => nameWord.includes(word)));
+                const emailMatch = searchTermWords.every(word => emailWords.some(emailWord => emailWord.includes(word)));
+
+                if (nameMatch || emailMatch) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';
@@ -245,5 +266,8 @@
 </body>
 
 </html>
+
+
+
 
 
