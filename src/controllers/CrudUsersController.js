@@ -14,11 +14,18 @@ const {
 const app = require('../config/Conexion');
 const db = getFirestore(app);
 
+// Modifica la función obtenerUsuariosDesdeFirestore en tu controlador
 async function obtenerUsuariosDesdeFirestore() {
   const usuariosCollection = collection(db, 'users');
   const usuariosSnapshot = await getDocs(usuariosCollection);
-  return usuariosSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+  return usuariosSnapshot.docs.map((doc, index) => ({
+    id: doc.id,
+    originalIndex: index, // Nueva propiedad para almacenar el índice original
+    ...doc.data(),
+  }));
 }
+
 
 async function obtenerUsuarioPorId(id) {
   const usuariosCollection = collection(db, 'users');
@@ -74,23 +81,24 @@ async function buscarUsuariosEnFirestore(terminoBusqueda) {
 
 const CrudUsersController = {};
 
+// Modifica la función indexUsuarios en tu controlador
 CrudUsersController.indexUsuarios = async function (req, res) {
   try {
     const searchTerm = req.query.search ? req.query.search.toLowerCase() : '';
-
-    // Obtener todos los usuarios desde Firestore
     const usuarios = await obtenerUsuariosDesdeFirestore();
 
-    // Filtrar usuarios por término de búsqueda
-    const usuariosFiltrados = usuarios.filter(usuario => {
-      const name = usuario.name.toLowerCase();
-      const email = usuario.email.toLowerCase();
-      return name.includes(searchTerm) || email.includes(searchTerm);
-    });
+    // Filtrar y ordenar usuarios por término de búsqueda y orden de creación
+    const usuariosFiltrados = usuarios
+      .filter((usuario) => {
+        const name = usuario.name.toLowerCase();
+        const email = usuario.email.toLowerCase();
+        return name.includes(searchTerm) || email.includes(searchTerm);
+      })
+      .sort((a, b) => a.originalIndex - b.originalIndex); // Ordenar por índice original
 
     // Aplicar paginación a los resultados filtrados
     const page = parseInt(req.query.page) || 1;
-    const itemsPerPage = 2;
+    const itemsPerPage = 3;
     const totalUsuariosFiltrados = usuariosFiltrados.length;
     const totalPages = Math.ceil(totalUsuariosFiltrados / itemsPerPage);
 
@@ -103,13 +111,13 @@ CrudUsersController.indexUsuarios = async function (req, res) {
       currentPage: page,
       totalPages: totalPages,
       search: req.query.search,
+      itemsPerPage: itemsPerPage,
     });
   } catch (error) {
     console.error('Error al obtener usuarios desde Firestore:', error);
     res.status(500).send('Error interno del servidor');
   }
 };
-
 
 
 CrudUsersController.formularioCrearUsuario = async function (req, res) {

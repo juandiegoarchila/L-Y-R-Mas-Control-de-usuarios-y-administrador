@@ -165,34 +165,36 @@
         </form>
 
         <div class="table-container">
-            <!-- Contenedor de la tabla que se actualizará -->
-            <table id="userTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Foto</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% usuarios.forEach(usuario => { %>
-                        <tr>
-                            <td><%= usuario.index %></td>
-                            <td><%= usuario.name %></td>
-                            <td><%= usuario.email %></td>
-                            <td><img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>"></td>
-                            <td class="action-buttons">
-                                <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
-                                <form action="usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">
-                                    <button type="submit">Eliminar</button>
-                                </form>
-                            </td>
-                        </tr>
-                    <% }); %>
-                </tbody>
-            </table>
+        <!-- Contenedor de la tabla que se actualizará -->
+<table id="userTable">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Foto</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        <% let userCount = (currentPage - 1) * itemsPerPage + 1; %>
+        <% usuarios.forEach(usuario => { %>
+            <tr>
+                <td><%= userCount++ %></td>
+                <td><%= usuario.name %></td>
+                <td><%= usuario.email %></td>
+                <td><img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>"></td>
+                <td class="action-buttons">
+                    <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
+                    <form action="usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">
+                        <button type="submit">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        <% }); %>
+    </tbody>
+</table>
+
         </div>
 
         <!-- Sección de paginación aquí -->
