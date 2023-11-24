@@ -1,18 +1,9 @@
-const {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  getDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-} = require('firebase/firestore');
-
-const app = require('../config/Conexion');
-const db = getFirestore(app);
+  const { getFirestore, collection, query, where, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc } = require('firebase/firestore');
+  const { getAuth, deleteUser } = require('firebase/auth');
+  const { getStorage, ref, deleteObject } = require('firebase/storage');
+  
+  const app = require('../config/Conexion');
+  const db = getFirestore(app);
 
 // Modifica la función obtenerUsuariosDesdeFirestore en tu controlador
 async function obtenerUsuariosDesdeFirestore() {
@@ -27,21 +18,28 @@ async function obtenerUsuariosDesdeFirestore() {
 }
 
 
-async function obtenerUsuarioPorId(id) {
-  const usuariosCollection = collection(db, 'users');
+async function eliminarUsuarioEnFirestore(id) {
+  const usuarioRef = doc(db, 'users', id);
 
   try {
-    const usuarioDoc = await getDoc(doc(usuariosCollection, id));
+    // Get the user data before deleting from Firestore
+    const usuarioDoc = await getDoc(usuarioRef);
+    const userData = usuarioDoc.data();
 
-    if (usuarioDoc.exists()) {
-      const usuario = usuarioDoc.data();
-      return { id: usuarioDoc.id, ...usuario };
-    } else {
-      console.error('Usuario no encontrado en obtenerUsuarioPorId');
-      return null;
+    // Delete the user document from Firestore
+    await deleteDoc(usuarioRef);
+
+    // Delete the user from Authentication using their email
+    const auth = getAuth();
+    await deleteUser(auth.currentUser);
+
+    // Delete the user's profile picture from Storage
+    if (userData.profileImageUrl) {
+      const storageRef = ref(getStorage(), `user-profile-pictures/${id}`);
+      await deleteObject(storageRef);
     }
   } catch (error) {
-    console.error('Error al obtener usuario por ID desde Firestore:', error);
+    console.error('Error al eliminar usuario en Firestore:', error);
     throw error;
   }
 }
@@ -59,8 +57,30 @@ async function crearUsuarioEnFirestore(usuario) {
 
 async function eliminarUsuarioEnFirestore(id) {
   const usuarioRef = doc(db, 'users', id);
-  await deleteDoc(usuarioRef);
+
+  try {
+    // Get the user data before deleting from Firestore
+    const usuarioDoc = await getDoc(usuarioRef);
+    const userData = usuarioDoc.data();
+
+    // Delete the user document from Firestore
+    await deleteDoc(usuarioRef);
+
+    // Delete the user from Authentication using their email
+    const auth = getAuth();
+    await deleteUser(auth.currentUser);
+
+    // Delete the user's profile picture from Storage
+    if (userData.profileImageUrl) {
+      const storageRef = ref(getStorage(), `user-profile-pictures/${id}`);
+      await deleteObject(storageRef);
+    }
+  } catch (error) {
+    console.error('Error al eliminar usuario en Firestore:', error);
+    throw error;
+  }
 }
+
 
 async function buscarUsuariosEnFirestore(terminoBusqueda) {
   const usuariosCollection = collection(db, 'users');
