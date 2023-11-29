@@ -1,45 +1,31 @@
-  const { getFirestore, collection, query, where, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc } = require('firebase/firestore');
-  const { getAuth, deleteUser } = require('firebase/auth');
-  const { getStorage, ref, deleteObject } = require('firebase/storage');
-  
-  const app = require('../config/Conexion');
-  const db = getFirestore(app);
+const { getFirestore, collection, query, where, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc } = require('firebase/firestore');
+const { getAuth, deleteUser, sendEmailVerification, createUserWithEmailAndPassword } = require('firebase/auth');
+const { getStorage, ref, deleteObject } = require('firebase/storage');
 
-// Modifica la función obtenerUsuariosDesdeFirestore en tu controlador
+const app = require('../config/Conexion');
+const db = getFirestore(app);
+
 async function obtenerUsuariosDesdeFirestore() {
   const usuariosCollection = collection(db, 'users');
   const usuariosSnapshot = await getDocs(usuariosCollection);
-
-  return usuariosSnapshot.docs.map((doc, index) => ({
-    id: doc.id,
-    originalIndex: index, // Nueva propiedad para almacenar el índice original
-    ...doc.data(),
-  }));
+  return usuariosSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
-
-async function eliminarUsuarioEnFirestore(id) {
-  const usuarioRef = doc(db, 'users', id);
+async function obtenerUsuarioPorId(id) {
+  const usuariosCollection = collection(db, 'users');
 
   try {
-    // Get the user data before deleting from Firestore
-    const usuarioDoc = await getDoc(usuarioRef);
-    const userData = usuarioDoc.data();
+    const usuarioDoc = await getDoc(doc(usuariosCollection, id));
 
-    // Delete the user document from Firestore
-    await deleteDoc(usuarioRef);
-
-    // Delete the user from Authentication using their email
-    const auth = getAuth();
-    await deleteUser(auth.currentUser);
-
-    // Delete the user's profile picture from Storage
-    if (userData.profileImageUrl) {
-      const storageRef = ref(getStorage(), `user-profile-pictures/${id}`);
-      await deleteObject(storageRef);
+    if (usuarioDoc.exists()) {
+      const usuario = usuarioDoc.data();
+      return { id: usuarioDoc.id, ...usuario };
+    } else {
+      console.error('Usuario no encontrado en obtenerUsuarioPorId');
+      return null;
     }
   } catch (error) {
-    console.error('Error al eliminar usuario en Firestore:', error);
+    console.error('Error al obtener usuario por ID desde Firestore:', error);
     throw error;
   }
 }
@@ -50,8 +36,10 @@ async function editarUsuarioEnFirestore(id, nuevosDatosUsuario) {
 }
 
 async function crearUsuarioEnFirestore(usuario) {
-  const { name, email } = usuario;
-  const docRef = await addDoc(collection(db, 'users'), { name, email });
+  const { name, email, uid } = usuario;
+
+  const docRef = await addDoc(collection(db, 'users'), { name, email, uid });
+
   return docRef.id;
 }
 
@@ -59,22 +47,32 @@ async function eliminarUsuarioEnFirestore(id) {
   const usuarioRef = doc(db, 'users', id);
 
   try {
-    // Get the user data before deleting from Firestore
     const usuarioDoc = await getDoc(usuarioRef);
+
+    if (!usuarioDoc.exists()) {
+      console.error('Usuario no encontrado en eliminarUsuarioEnFirestore');
+      return;
+    }
+
     const userData = usuarioDoc.data();
 
-    // Delete the user document from Firestore
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (user && user.uid === userData.uid) {
+      // Eliminar usuario en Firebase Authentication antes de continuar
+      await deleteUser(user);
+    }
+
+    // Eliminar usuario en Firestore
     await deleteDoc(usuarioRef);
 
-    // Delete the user from Authentication using their email
-    const auth = getAuth();
-    await deleteUser(auth.currentUser);
-
-    // Delete the user's profile picture from Storage
     if (userData.profileImageUrl) {
       const storageRef = ref(getStorage(), `user-profile-pictures/${id}`);
       await deleteObject(storageRef);
     }
+
+    console.log('Usuario eliminado con ID:', id);
   } catch (error) {
     console.error('Error al eliminar usuario en Firestore:', error);
     throw error;
@@ -101,7 +99,6 @@ async function buscarUsuariosEnFirestore(terminoBusqueda) {
 
 const CrudUsersController = {};
 
-// Modifica la función indexUsuarios en tu controlador
 CrudUsersController.indexUsuarios = async function (req, res) {
   try {
     const searchTerm = req.query.search ? req.query.search.toLowerCase() : '';
@@ -115,7 +112,6 @@ CrudUsersController.indexUsuarios = async function (req, res) {
       })
       .sort((a, b) => a.originalIndex - b.originalIndex);
 
-    // Obtener el valor seleccionado del menú desplegable (por defecto 5)
     const itemsPerPage = parseInt(req.query.entries) || 5;
 
     const totalUsuariosFiltrados = usuariosFiltrados.length;
@@ -148,9 +144,23 @@ CrudUsersController.crearUsuario = async function (req, res) {
     const nuevoUsuario = {
       name: req.body.name,
       email: req.body.email,
+      password: req.body.password,
+      confirm_password: req.body.confirm_password,
     };
 
+    const auth = getAuth();
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      nuevoUsuario.email,
+      nuevoUsuario.password
+    );
+    const user = userCredential.user;
+
+    nuevoUsuario.uid = user.uid;
     const idUsuario = await crearUsuarioEnFirestore(nuevoUsuario);
+
+    await sendEmailVerification(user);
+
     console.log('Nuevo usuario creado con ID:', idUsuario);
 
     res.redirect('/Crud/Users/usuarios');
