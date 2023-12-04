@@ -35,12 +35,29 @@ async function editarUsuarioEnFirestore(id, nuevosDatosUsuario) {
   await updateDoc(usuarioRef, nuevosDatosUsuario);
 }
 
-async function crearUsuarioEnFirestore(usuario) {
+async function crearUsuarioEnFirestore(usuario, isAdmin = false) {
   const { name, email, uid } = usuario;
+  const role = isAdmin ? 1 : 0; // 0 para usuarios regulares, 1 para administradores
 
-  const docRef = await addDoc(collection(db, 'users'), { name, email, uid });
+  try {
+    // Intenta crear el usuario en Firestore
+    const docRef = await addDoc(collection(db, 'users'), { name, email, uid, role });
 
-  return docRef.id;
+    return docRef.id;
+  } catch (error) {
+    // Captura la excepción si el correo electrónico ya está en uso
+    if (error.code === 'auth/email-already-in-use') {
+      // Utiliza el sistema de mensajes flash para mostrar el mensaje de error
+      req.flash('error_msg', 'El correo electrónico ya está en uso.');
+      // Redirige al formulario de registro
+      return res.redirect('/Crud/Users/usuarios/crear');
+    } else {
+      // Si hay otro tipo de error, regístralo en la consola y envía un mensaje genérico
+      console.error('Error al crear usuario en Firestore:', error);
+      req.flash('error_msg', 'Error al registrar el usuario. Por favor, inténtalo de nuevo.');
+      return res.redirect('/Crud/Users/usuarios/crear');
+    }
+  }
 }
 
 async function eliminarUsuarioEnFirestore(id) {
@@ -157,7 +174,9 @@ CrudUsersController.crearUsuario = async function (req, res) {
     const user = userCredential.user;
 
     nuevoUsuario.uid = user.uid;
-    const idUsuario = await crearUsuarioEnFirestore(nuevoUsuario);
+
+    // El segundo argumento indica si el usuario debe tener el rol de administrador
+    const idUsuario = await crearUsuarioEnFirestore(nuevoUsuario, req.body.isAdmin);
 
     await sendEmailVerification(user);
 
@@ -169,6 +188,7 @@ CrudUsersController.crearUsuario = async function (req, res) {
     res.status(500).send('Error interno del servidor');
   }
 };
+
 
 CrudUsersController.formularioEditarUsuario = async function (req, res) {
   try {

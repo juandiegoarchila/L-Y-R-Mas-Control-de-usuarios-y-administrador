@@ -33,4 +33,16 @@ router.post('/profile', userCtrol.updateProfile);
 
 
 
+
+
+//Administrador
+router.get('/signinAdmin', userCtrol.rendersigninFormAdmin);
+
+router.post('/signinAdmin', userCtrol.signinAdmin);
+
+router.get('/forgot-Admin', userCtrol.AdminPasswordForm);
+
+// Ruta para manejar la solicitud de recuperación de contraseña del administrador
+router.post('/forgot-Admin', userCtrol.AdminforgotPassword);
+
 module.exports = router;

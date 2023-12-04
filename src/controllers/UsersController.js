@@ -30,12 +30,15 @@ userCtrol.signup = async (req, res) => {
     // Envía un correo de verificación al usuario
     await sendEmailVerification(user);
 
-    // Guarda la información del usuario en Firestore
+    // Define la referencia del usuario en Firestore
     const userRef = collection(firestore, 'users');
+
+    // Guarda la información del usuario en Firestore
     await addDoc(userRef, {
       uid: user.uid,
       name: name,
       email: email,
+      role: 0, // Establece el rol en 0 para usuarios regulares y 1 para administradores
     });
 
     req.flash('success_msg', '¡Registro exitoso! Se ha enviado un correo de verificación a tu dirección de correo electrónico.');
@@ -66,14 +69,51 @@ userCtrol.signin = async (req, res, next) => {
       return res.redirect('/users/signin');
     }
 
-    req.flash('success_msg', '¡Sesión iniciada!');
-    res.redirect('/crud'); // Redirige al "crud" o la página que desees.
+    // Verifica el rol del usuario
+    const userRole = await getUserRole(user.uid);
+
+    if (userRole === 1) {
+      // Administrador
+      req.flash('success_msg', '¡Sesión iniciada como administrador!');
+      return res.redirect('/Crud/Users/usuarios');
+    } else {
+      // Usuario regular
+      req.flash('success_msg', '¡Sesión iniciada!');
+      return res.redirect('/crud'); // Redirige a la página de usuario regular
+    }
   } catch (error) {
     console.error('Usuario o contraseña incorrectos', error);
     req.flash('error_msg', 'Usuario o contraseña incorrectos');
-    res.redirect('/users/signin');
+    // Cambia la siguiente línea para redirigir al usuario según su rol
+    return res.redirect('/users/signin'); 
   }
 };
+
+
+async function getUserRole(uid) {
+  const firestore = getFirestore(app);
+  const userRef = collection(firestore, 'users');
+  const userQuery = query(userRef, where('uid', '==', uid));
+
+  try {
+    const querySnapshot = await getDocs(userQuery);
+
+    if (!querySnapshot.empty) {
+      const userData = querySnapshot.docs[0].data();
+      return userData.role || 0; // Rol predeterminado en 0 si no está presente (usuario regular)
+    } else {
+      return 0; // Rol predeterminado en 0 si no se encuentra al usuario
+    }
+  } catch (error) {
+    console.error('Error al consultar Firestore:', error);
+    return 0; // Rol predeterminado en 0 en caso de error
+  }
+}
+
+userCtrol.rendersigninFormAdmin = (req, res) => {
+  res.render('users/SigninAd'); // Actualiza la ruta de la vista
+}; 
+
 
 
 userCtrol.logout = (req, res) => {
@@ -233,5 +273,74 @@ userCtrol.updateProfile = async (req, res) => {
     return res.redirect('/users/signin');
   }
 };
+
+
+//Administrador
+
+userCtrol.rendersigninFormAdmin = (req, res) => {
+  res.render('users/signinAdmin'); // Actualiza la ruta de la vista
+}; 
+
+userCtrol.signinAdmin = async (req, res) => {
+  const { email, password } = req.body;
+  const auth = getAuth(app);
+
+  try {
+    // Inicia sesión con Firebase Authentication
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    if (!user.emailVerified) {
+      req.flash('error_msg', 'Debes verificar tu correo electrónico antes de iniciar sesión.');
+      return res.redirect('/users/signinAdmin');
+    }
+
+    // Verifica el rol del usuario
+    const userRole = await getUserRole(user.uid);
+
+    if (userRole === 1) {
+      // Administrador
+      req.flash('success_msg', '¡Sesión iniciada como administrador!');
+      return res.redirect('/Crud/Users/usuarios');
+    } else {
+      // Usuario regular
+      req.flash('error_msg', 'No tienes permisos de administrador.');
+      return res.redirect('/users/signinAdmin');
+    }
+  } catch (error) {
+    console.error('Error al iniciar sesión:', error);
+
+    // Establece un mensaje de error
+    req.flash('error_msg', 'Usuario o contraseña incorrectos o correo no verificado.');
+    
+    // Renderizar la vista de inicio de sesión del administrador con el mensaje de error
+    return res.render('users/signinAdmin', { error_msg: req.flash('error_msg') });
+  }
+};
+
+
+
+userCtrol.AdminPasswordForm = (req, res) => {
+  res.render('users/forgot-Admin');
+};
+
+// Procesa la solicitud de restablecimiento de contraseña del administrador
+userCtrol.AdminforgotPassword = async (req, res) => {
+  const { email } = req.body;
+  const auth = getAuth(app);
+
+  try {
+    // Envía un correo electrónico para restablecer la contraseña
+    await sendPasswordResetEmail(auth, email);
+    req.flash('success_msg', 'Se ha enviado un correo electrónico para restablecer la contraseña.');
+    res.redirect('/users/signinAdmin'); // Redirige a la página de inicio de sesión del administrador.
+  } catch (error) {
+    console.error('Error al enviar el correo electrónico de restablecimiento de contraseña:', error);
+    req.flash('error_msg', 'Error al enviar el correo electrónico de restablecimiento de contraseña');
+    res.redirect('/users/forgot-Admin');
+  }
+};
+
+
 
 module.exports = userCtrol;
