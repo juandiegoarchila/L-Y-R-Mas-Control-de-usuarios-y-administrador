@@ -1,245 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
+<%- include('../layouts/Admin.ejs') %>
+<% include('../partials/errors.ejs') %>
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Usuarios</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f2f2f2;
-        }
 
-        .container {
-            max-width: 800px;
-            margin: 20px auto;
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            box-sizing: border-box;
-            position: relative;
-            margin-top: 70px;
-        }
 
-        h1 {
-            border-radius: 8px 8px 0 0;
-            text-align: left;
-            font-size: 15px;
-        }
-
-        hr {
-            border: 1px solid #ddd;
-            margin-bottom: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        img {
-            max-width: 50px;
-            max-height: 50px;
-            border-radius: 50%;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: #f5f5f5;
-        }
-
-        a,
-        button {
-            padding: 8px 12px;
-            text-decoration: none;
-            cursor: pointer;
-            border: none;
-            color: white;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        a {
-            background-color: #4CAF50;
-            margin-right: 10px;
-        }
-
-        button {
-            background-color: #f44336;
-        }
-
-        input[type="text"] {
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            display: inline-block;
-            float: right;
-        }
-
-        select {
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            display: inline-block;
-            float: right;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            width: 100%;
-        }
-
-        table {
-            min-width: 500px;
-        }
-
-        .create-user-link {
-            background-color: #4CAF50;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            text-decoration: none;
-            position: absolute;
-            top: 18px;
-            right: 20px;
-        }
-
-        .pagination {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .pagination-info {
-            margin-left: 10px;
-        }
-
-        .page-numbers {
-            display: flex;
-            align-items: center;
-        }
-
-        .page-number {
-            background-color: #4CAF50;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 0 5px;
-        }
-
-        .page-number:hover {
-            background-color: #45a049;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .page-number.active {
-            background-color: #45a049;
-        }
-        /* Estilos originales aquí ... */
-
-/* Estilos para hacer el formulario de búsqueda responsive */
-@media screen and (max-width: 600px) {
-    input[type="text"],
-    select {
-        width: 100%;
-        margin-bottom: 10px;
-        float: none;
-    }
-}
-
-    </style>
-</head>
 
 <body>
-    <div class="container">
-        <h1>Lista de Usuarios</h1>
-        <a href="usuarios/crear" class="create-user-link">Crear Usuario</a>
-        <hr>
-
-        <!-- Agrega este formulario antes de tu tabla -->
-       <!-- Agrega este formulario antes de tu tabla -->
-<form id="searchForm" action="/Crud/Users/usuarios" method="GET" style="display: flex; justify-content: space-between; align-items: center;">
-    <!-- Agregamos el elemento select para seleccionar la cantidad de entradas a mostrar -->
-    <div style="display: flex; align-items: center;">
-        <label for="entries" style="margin-right: 5px;">Mostrar:</label>
-        <select id="entries" name="entries" onchange="updateTable(this.value)">
-            <option value="5" <%= itemsPerPage === 5 ? 'selected' : '' %>>5</option>
-            <option value="15" <%= itemsPerPage === 15 ? 'selected' : '' %>>15</option>
-            <option value="20" <%= itemsPerPage === 20 ? 'selected' : '' %>>20</option>
-            <!-- Puedes agregar más opciones según sea necesario -->
-        </select>
-    </div>
-
-    <div style="display: flex; align-items: center;">
-        <input type="text" name="search" id="search" placeholder="Buscar por nombre o email..."
-            value="<%= search || '' %>">
-    </div>
-</form>
-
+    <div class="main-container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1 class="header-title">Lista de Usuarios</h1>
+            <a href="usuarios/crear" class="btn btn-primary" type="button"><ion-icon class="iconoo" name="add-outline"></ion-icon>Crear usuario</a>
+        </div>
+        <hr class="separator">
+    
+        <form id="searchForm" action="/Crud/Users/usuarios" method="GET"
+            style="display: flex; justify-content: space-between; align-items: center;">
+            <div >
+                <label for="entries" style="margin-right: 5px;">Mostrar:</label>
+                <select id="entries" name="entries" onchange="updateTable(this.value)">
+                    <option value="5" <%= itemsPerPage === 5 ? 'selected' : '' %>>5</option>
+                    <option value="15" <%= itemsPerPage === 15 ? 'selected' : '' %>>15</option>
+                    <option value="20" <%= itemsPerPage === 20 ? 'selected' : '' %>>20</option>
+                </select> Paginas
+            </div>
+    
+            <div style="display: flex; align-items: center;">
+                <input type="text" name="search" id="search" class="search-input"
+                    placeholder="Buscar " value="<%= search || '' %>">
+            </div>
+        </form>
 
         <div class="table-container">
-            <!-- Contenedor de la tabla que se actualizará -->
-            <table id="userTable">
+            <table class="user-table">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Nombre</th>
-                        <th>Email</th>
-                        <th>Foto</th>
-                        <th>Acciones</th>
+                        <th class="table-header">N°</th>
+                        <th class="table-header">Nombre</th>
+                        <th class="table-header">Email</th>
+                        <th class="table-header">Foto</th>
+                        <th class="table-header">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% let userCount = (currentPage - 1) * itemsPerPage + 1; %>
                     <% usuarios.forEach(usuario => { %>
-                        <tr>
-                            <td><%= userCount++ %></td>
-                            <td><%= usuario.name %></td>
-                            <td><%= usuario.email %></td>
-                            <td>
+                        <tr class="<%= userCount % 2 === 0 ? 'even-row' : '' %>">
+                            <td class="table-cell"><%= userCount++ %></td>
+                            <td class="table-cell"><%= usuario.name %></td>
+                            <td class="table-cell"><%= usuario.email %></td>
+                            <td class="table-cell">
                                 <% if (usuario.profileImageUrl) { %>
-                                <img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>">
+                                    <img src="<%= usuario.profileImageUrl %>" alt="Foto de <%= usuario.name %>"
+                                        class="user-image">
                                 <% } else { %>
-                                <!-- Mostrar imagen predeterminada si no hay imagen de perfil -->
-                                <img src="/imagenes/avatar.jpg" alt="Foto predeterminada">
+                                    <img src="/imagenes/avatar.jpg" alt="Foto predeterminada" class="user-image">
                                 <% } %>
                             </td>
-                            <td class="action-buttons">
-                                <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>">Editar</a>
+                            
+                        <td class="table-cell">
+                            <div class="btn-group" role="group" aria-label="button group">
+                                <a href="/Crud/Users/usuarios/editar/<%= usuario.id %>" >
+                                    <ion-icon name="pencil-outline"></ion-icon>
+                                </a>
+                            </div>
+
+                            <div class="btn-group" role="group" aria-label="button group">
                                 <form action="usuarios/eliminar/<%= usuario.id %>?_method=DELETE" method="POST">
-                                    <button type="submit">Eliminar</button>
+                                    <button type="submit" class="action-button">
+                                        <ion-icon name="trash-outline"></ion-icon>
+                                    </button>
                                 </form>
-                            </td>
+                            </div>
+                        </td>
+
                         </tr>
                     <% }); %>
                 </tbody>
             </table>
         </div>
+        
 
-        <div class="pagination">
+        <div class="pagination-container">
             <div class="pagination-info">
                 <span>Mostrando:</span>
                 <span id="pagination-info">Página <%= currentPage %> de <%= totalPages %>.</span>
@@ -248,7 +88,7 @@
                 <% const pageGroupSize = 3; %>
                 <% const startPage = Math.max(1, currentPage - Math.floor(pageGroupSize / 2)); %>
                 <% const endPage = Math.min(startPage + pageGroupSize - 1, totalPages); %>
-        
+
                 <a href="?page=<%= currentPage - 1 %>"
                     class="page-number <%= currentPage === 1 ? 'disabled hidden' : '' %>">&lt;</a>
                 <% for (let i = startPage; i <= endPage; i++) { %>
@@ -262,33 +102,27 @@
         </div>
     </div>
 
-    <!-- Script para la funcionalidad de búsqueda y selección de entradas -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
         $(document).ready(function () {
             const searchInput = document.getElementById('search');
-    
+
             searchInput.addEventListener('input', function () {
                 const searchTerm = searchInput.value.toLowerCase();
-                console.log('Término de búsqueda:', searchTerm);
-    
-                // Utilizar AJAX para enviar la solicitud de búsqueda al servidor
+
                 $.ajax({
                     type: 'GET',
                     url: '/Crud/Users/usuarios',
                     data: { search: searchTerm },
                     success: function (data) {
-                        // Actualizar solo la tabla y la información de paginación
                         const container = document.createElement('div');
                         container.innerHTML = data;
-    
-                        const newTable = container.querySelector('#userTable');
-                        const newPagination = container.querySelector('.pagination');
-    
-                        // Reemplazar el contenido de la tabla existente con el nuevo
-                        $('#userTable').replaceWith(newTable);
-                        // Reemplazar el contenido de la paginación existente con el nuevo
-                        $('.pagination').replaceWith(newPagination);
+
+                        const newTable = container.querySelector('.user-table');
+                        const newPagination = container.querySelector('.pagination-container');
+
+                        $('.user-table').replaceWith(newTable);
+                        $('.pagination-container').replaceWith(newPagination);
                     },
                     error: function (error) {
                         console.error('Error en la solicitud AJAX:', error);
@@ -296,34 +130,30 @@
                 });
             });
         });
-    
-        // Función para actualizar la cantidad de entradas a mostrar
+
         function updateTable(entries) {
-            // Utilizar AJAX para enviar la solicitud al servidor con la nueva cantidad de entradas
             $.ajax({
                 type: 'GET',
                 url: '/Crud/Users/usuarios',
-                data: { entries: entries }, // Ajustar los nombres de parámetros según sea necesario
+                data: { entries: entries },
                 success: function (data) {
-                    // Actualizar solo la tabla y la información de paginación
                     const container = document.createElement('div');
                     container.innerHTML = data;
-    
-                    const newTable = container.querySelector('#userTable');
-                    const newPagination = container.querySelector('.pagination');
-    
-                    // Reemplazar el contenido de la tabla existente con el nuevo
-                    $('#userTable').replaceWith(newTable);
-                    // Reemplazar el contenido de la paginación existente con el nuevo
-                    $('.pagination').replaceWith(newPagination);
+
+                    const newTable = container.querySelector('.user-table');
+                    const newPagination = container.querySelector('.pagination-container');
+
+                    $('.user-table').replaceWith(newTable);
+                    $('.pagination-container').replaceWith(newPagination);
                 },
                 error: function (error) {
                     console.error('Error en la solicitud AJAX:', error);
                 }
             });
         }
-        
     </script>
 </body>
 
 </html>
+
+<%- include('../layouts/PieAdmin.ejs') %>

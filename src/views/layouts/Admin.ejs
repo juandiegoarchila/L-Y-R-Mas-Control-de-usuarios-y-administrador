@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+    
+    <title>Tu Título</title>
+</head>
+<body >
+                  
+    <div class="sidebar">
+        <ul>
+            <li class="logo" style="--bg: #333;">
+                <a href="#">
+                    <div class="icon"><ion-icon name="checkmark-circle-outline"></ion-icon></div>
+                    <div class="text">QUANTIFY</div>
+                </a>
+            </li>
+            <li style="--bg:#ffa117;" class="active">
+                <a href="./inicio">
+                    <div class="icon"><ion-icon name="home-outline"></ion-icon></div>
+                    <div class="text">Inicio</div>
+                </a>
+            </li>
+            <li style="--bg:#29b3bd;">
+                <a href="./notificacion" >
+                    <div class="icon"><ion-icon name="person-outline"></ion-icon></div>
+                    <div class="text">Usuarios</div>
+                </a>
+            </li>
+            <li style="--bg:#0be633;">
+                <a href="./table">
+                    <div class="icon"><ion-icon name="chatbox-ellipses-outline"></ion-icon></div>
+                    <div class="text">Mensajes</div>
+                </a>
+            </li>
+            <li style="--bg:#e41aab;">
+                <a href="./inicio.ejs">
+                    <div class="icon"><ion-icon name="stats-chart-outline"></ion-icon></div>
+                    <div class="text">Analiticas</div>
+                </a>
+            </li>
+            <li style="--bg:#e20e0e;">
+                <a href="#">
+                    <div class="icon"><ion-icon name="calendar-outline"></ion-icon></div>
+                    <div class="text"> Calendario</div>
+                </a>
+            </li>
+            <li style="--bg:#0011ff;">
+                <a href="./upgrade.html">
+                    <div class="icon"><ion-icon name="settings-outline"></ion-icon></div>
+                    <div class="text">Configuracion</div>
+                </a>
+            </li>
+            </div>
+        </div>
+        <div class="main">
+            <div class="topbar">
+                <div class="MenuTogle">
+                </div>
+                <!-- serach -->
+                <div class="search">
+                    <label>
+                        <input type="text" placeholder="Buscar">
+                        <ion-icon name="search-outline"></ion-icon>
+                    </label>
+                </div>
+
+
+            <div class="dropdown">
+                <button class="dropbtn">
+                    <div class="iconn"><ion-icon name="person-outline"></ion-icon></div>
+
+                    <span class="userName">
+                        Admin
+                        <ion-icon name="chevron-down-outline"></ion-icon>
+                    </span>
+                </button>
+                <div class="dropdown-content" id="dropdownContent">
+                  <a href="/users/signinAdmin">Cerrar Sesión</a>
+                </div>
+              </div>
+            
+
+
+        </div>
+     
+          

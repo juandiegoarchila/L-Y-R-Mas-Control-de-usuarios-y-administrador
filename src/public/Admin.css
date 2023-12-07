@@ -300,7 +300,7 @@ body {
     width: calc(100% - 300px);
     left: 300px;
     min-height: 100vh;
-    background: #F5F5F5;
+    background: var(--clr);
     transition: 0.5s;
   
 
@@ -311,7 +311,7 @@ body {
     left: 80px;
 }
 .topbar{
-    background: #E0ECE4;
+    background: #e5e5e5;
     height: 50%;
     width: 100%;
     height: 60px; 
@@ -766,7 +766,7 @@ body {
     width: 40px; /* Ajusta el tamaño según tus preferencias */
     height: 40px; /* Ajusta el tamaño según tus preferencias */
     border-radius: 50%;
-    margin-right: 10px; /* Ajusta el espacio entre la imagen y el nombre */
+    margin-right: 0px; /* Ajusta el espacio entre la imagen y el nombre */
   }
   
   /* Estilos para el nombre de usuario en el botón */
@@ -784,242 +784,4 @@ body {
     font-size: 18px; /* Ajusta el tamaño del ícono según tus preferencias */
     vertical-align: middle; /* Alinea verticalmente con el texto */
   }
-  /* Agrega este estilo a tu hoja de estilos CSS */
-.dropbtn {
-    display: flex;
-    align-items: center;
-}
-
-.iconn {
-    margin-right: 10px; /* Puedes ajustar el margen según sea necesario */
-    margin-top: 2px;
-}
-
-
-
-/* Tabla Usuarios  */
-
-       body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-         .main-container {
-        display: flex;
-        flex-direction: column;
-        max-width: 1000px;
-        margin: 50px auto;
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        box-sizing: border-box;
-        position: relative;
-    }
-
-    .header-title {
-        border-radius: 8px 8px 0 0;
-        font-size: 20px;
-    }
-
-    .separator {
-        border: 1px solid #ac1b1b;
-        margin-bottom: 10px;
-    }
-
-    .btn-primary {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      
-    }
-    
-    .btn-primary ion-icon {
-        margin-left: 5px; /* Ajusta el espacio entre el icono y el texto según tus preferencias */
-        font-size: 22px; /* Aplicar el tamaño de fuente al icono */
-        position: relative;
-        left: -5px;
-    }
-    
-
-    .action-link {
-        text-decoration: none;
-        padding: 8px 12px;
-        border-radius: 4px;
-        color: white;
-        display: block;
-    }
-
-    .action-link:hover {
-        background-color: #45a049;
-    }
-
-    .search-form {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-    }
-
-    .search-input {
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        margin-right: 5px;
-    }
-
-    .entries-select {
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-    }
-        .user-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .table-cell,
-        .table-header {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: center;
-        }
-
-        .table-header {
-            background-color:#a2d3c7;
-        }
-
-
-      
-        .user-image {
-            max-width: 25px;
-            max-height: 25px;
-            border-radius: 50%;
-        }
-
-        .even-row {
-            background-color: #f5f5f5;
-        }
-
-        .action-link,
-        .action-button {
-            padding: 2px 2px;
-            text-decoration: none;
-            cursor: pointer;
-            border: none;
-         
-        }
-
-        .action-link {
-            background-color: #4CAF50;
-            margin-right: 10px;
-            
-        }
-        .action-button {
-            background-color: transparent; /* Puedes usar también rgba(0, 0, 0, 0) */
-            color: white; /* Ajusta el color del texto según tu diseño */
-            border: none;
-        }
-        
-
-       
-
-        .search-input {
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        .entries-select {
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            width: 100%;
-            height: 50%;
-        }
-
-        .pagination-container {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            
-            
-        }
-
-        .pagination-info {
-            margin-left: 10px;
-        }
-
-        .page-numbers {
-            display: flex;
-            align-items: center;
-        }
-
-        .page-number {
-            background-color: #4CAF50;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 0 5px;
-        }
-
-        .page-number:hover {
-            background-color: #45a049;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .page-number.active {
-            background-color: #45a049;
-        }
-
-        @media screen and (max-width: 600px) {
-            .search-input,
-            .entries-select {
-                width: 100%;
-                margin-bottom: 10px;
-                float: none;
-            }
-        }
-   
-        
-        .table-cell {
-            flex: 1;
-            box-sizing: border-box;
-            padding: 4px; /* Ajustar el padding según tu preferencia */
-        }
-        .table-cell {
-            padding: 1px; /* Reducir el padding */
-            font-size: 15px; /* Ajustar el tamaño de la fuente según tu preferencia */
-        }
-      
-        
-            
-        /* ... Estilos anteriores ... */
-
-        /* Añadido para separar los íconos y agrandarlos */
-        .table-cell .btn-group a ion-icon,
-        .table-cell .btn-group button ion-icon {
-            margin-right: 5px; /* Ajustar el espacio entre el ícono y el texto según tu preferencia */
-            font-size: 25px; /* Ajustar el tamaño del ícono según tu preferencia */
-        }
-
-        .table-cell .btn-group button ion-icon {
-            color: #DC3545; /* Cambia el color del ícono de eliminar según tu preferencia */
-        }
-
-
+  

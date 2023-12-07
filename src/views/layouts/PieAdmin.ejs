@@ -1,0 +1,42 @@
+
+   <!-- Contenido de tu página -->
+   <script src="/JS/Dash.js"></script>
+    
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js"></script>
+   <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+   <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>    </body>
+   
+</body>
+</html>
+
+
+
+<!-- menu desplegable -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let dropdownButton = document.querySelector('.dropbtn');
+        let dropdownContent = document.getElementById('dropdownContent');
+
+        // Agrega un controlador de eventos para hacer clic en el botón
+        dropdownButton.addEventListener('click', function (event) {
+            // Detén la propagación del evento para evitar cerrar inmediatamente el menú
+            event.stopPropagation();
+            
+            // Alternar la visibilidad del menú desplegable
+            dropdownContent.style.display = (dropdownContent.style.display === 'block') ? 'none' : 'block';
+        });
+
+        // Agrega un controlador de eventos al cuerpo del documento para cerrar el menú cuando se hace clic fuera de él
+        document.body.addEventListener('click', function () {
+            dropdownContent.style.display = 'none';
+        });
+
+        // Agrega un controlador de eventos para evitar que el clic en el menú se propague al cuerpo del documento
+        dropdownContent.addEventListener('click', function (event) {
+            event.stopPropagation();
+        });
+    });
+
+    
+</script>

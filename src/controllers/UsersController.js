@@ -78,7 +78,7 @@ userCtrol.signin = async (req, res, next) => {
       return res.redirect('/Crud/Users/usuarios');
     } else {
       // Usuario regular
-      req.flash('success_msg', '¡Sesión iniciada!');
+      req.flash('success_msg', '¡Bienvenido !');
       return res.redirect('/crud'); // Redirige a la página de usuario regular
     }
   } catch (error) {

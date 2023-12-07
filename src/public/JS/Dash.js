@@ -57,3 +57,6 @@ document.body.addEventListener('click', () => {
 dropdownContent.addEventListener('click', (event) => {
     event.stopPropagation();
 });
+
+
+
