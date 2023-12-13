@@ -8,8 +8,26 @@
     <div class="main-container">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h1 class="header-title">Lista de Usuarios</h1>
-            <a href="usuarios/crear" class="btn btn-primary" type="button"><ion-icon class="iconoo" name="add-outline"></ion-icon>Crear usuario</a>
+            <div style="display: flex; align-items: center;">
+                <a href="usuarios/crear" class="btn btn-primary" type="button">
+                    <ion-icon name="add-outline"></ion-icon> Crear usuario
+                </a>
+        
+                <!-- Tres puntos adicionales -->
+                <div class="dropdown">
+                    <div class="btn-group ellipsis-button" role="group">
+                        <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+                    </div>
+                    <div class="ellipsis-content">
+                        <a href="#">Exportar a PDF</a>
+                        <a href="#">Exportar a Excel</a>
+                        <a href="#">Exportar a CSV</a>
+                    </div>
+                </div>
+            </div>
         </div>
+        
+        
         <hr class="separator">
     
         <form id="searchForm" action="/Crud/Users/usuarios" method="GET"
@@ -70,6 +88,16 @@
                                     </button>
                                 </form>
                             </div>
+                            <div class="dropdown">
+                                <div class="btn-group ellipsis-button" role="group">
+                                    <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+                                </div>
+                                <div class="ellipsis-content">
+                                    <a href="#">Restablecer contraseña</a>
+                                    <a href="#">Inhabilitar cuenta</a>
+                                    <a href="#">Ver perfil</a>
+                                </div>
+                            </div>
                         </td>
 
                         </tr>
@@ -77,6 +105,7 @@
                 </tbody>
             </table>
         </div>
+     
         
 
         <div class="pagination-container">

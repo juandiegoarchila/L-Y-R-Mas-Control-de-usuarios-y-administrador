@@ -14,29 +14,68 @@
 
 <!-- menu desplegable -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+   document.addEventListener('DOMContentLoaded', function () {
+        // Menú desplegable 1
         let dropdownButton = document.querySelector('.dropbtn');
         let dropdownContent = document.getElementById('dropdownContent');
 
-        // Agrega un controlador de eventos para hacer clic en el botón
         dropdownButton.addEventListener('click', function (event) {
-            // Detén la propagación del evento para evitar cerrar inmediatamente el menú
             event.stopPropagation();
-            
-            // Alternar la visibilidad del menú desplegable
             dropdownContent.style.display = (dropdownContent.style.display === 'block') ? 'none' : 'block';
         });
 
-        // Agrega un controlador de eventos al cuerpo del documento para cerrar el menú cuando se hace clic fuera de él
         document.body.addEventListener('click', function () {
             dropdownContent.style.display = 'none';
         });
 
-        // Agrega un controlador de eventos para evitar que el clic en el menú se propague al cuerpo del documento
         dropdownContent.addEventListener('click', function (event) {
             event.stopPropagation();
         });
-    });
 
-    
-</script>
+
+
+        // Ocultar todos los menús desplegables al principio
+        document.querySelectorAll('.ellipsis-content').forEach(function (content) {
+            content.style.display = 'none';
+        });
+
+        // Menú desplegable 2
+        var ellipsisButtons = document.querySelectorAll(".ellipsis-button");
+        ellipsisButtons.forEach(function (ellipsisButton) {
+            ellipsisButton.addEventListener("click", function (event) {
+                event.stopPropagation();
+                toggleEllipsisMenu(ellipsisButton);
+            });
+        });
+
+        document.addEventListener("click", function (event) {
+            if (!event.target.closest(".ellipsis-dropdown")) {
+                document.querySelectorAll(".ellipsis-content").forEach(function (content) {
+                    content.style.display = "none";
+                });
+            }
+        });
+
+        document.querySelectorAll('.ellipsis-dropdown').forEach(function (dropdown) {
+            dropdown.addEventListener("mouseenter", function () {
+                ellipsisContent.style.display = "block";
+            });
+
+            dropdown.addEventListener("mouseleave", function () {
+                ellipsisContent.style.display = "none";
+            });
+        });
+
+        function toggleEllipsisMenu(ellipsisButton) {
+            const ellipsisContent = ellipsisButton.nextElementSibling;
+            if (ellipsisContent.style.display === "block") {
+                ellipsisContent.style.display = "none";
+            } else {
+                document.querySelectorAll(".ellipsis-content").forEach(function (content) {
+                    content.style.display = "none";
+                });
+                ellipsisContent.style.display = "block";
+            }
+        }
+    });
+    </script>

@@ -943,10 +943,18 @@ body {
         }
 
         .table-container {
-            overflow-x: auto;
             width: 100%;
             height: 50%;
         }
+
+        @media only screen and (max-width: 667px) {
+            .table-container {
+                overflow-x: auto;
+                width: 100%;
+                height: 50%;
+            }
+        }
+        
 
         .pagination-container {
             margin-top: 20px;
@@ -1023,3 +1031,103 @@ body {
         }
 
 
+
+
+.ellipsis-menu {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    background-color: #f0f0f0;
+    transition: background-color 0.3s ease;
+}
+
+.ellipsis-menu ion-icon {
+    font-size: 20px;
+    color: #333;
+}
+
+.ellipsis-menu:hover {
+    background-color: #ddd; /* Cambia el color al pasar el ratón sobre el icono */
+}
+
+.ellipsis-content {
+    display: none;
+    position: absolute;
+    top: -5px;
+    left: -200px;
+    width: 210px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    z-index: 10;
+}
+
+.ellipsis-content a {
+    display: block;
+    padding: 1px;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.3s ease;
+}
+
+.ellipsis-content a:hover {
+    background-color: #f0f0f0; /* Cambia el color al pasar el ratón sobre las opciones */
+}
+
+.dropdown:hover .ellipsis-content {
+    display: block;
+}
+
+
+
+
+
+
+/* Estilo para el ícono en el menú desplegable */
+.dropdown .btn-group ion-icon {
+    font-size: 20px; /* Ajusta el tamaño del icono según sea necesario */
+    color: #333; /* Ajusta el color del icono según sea necesario */
+    cursor: pointer; /* Cambia el cursor al pasar sobre el icono */
+}
+
+/* Estilo para resaltar el ícono al pasar el ratón sobre él */
+.dropdown .btn-group:hover ion-icon {
+    color: #555; /* Cambia el color al pasar el ratón sobre el icono */
+}
+
+/* Otros estilos para el menú desplegable */
+.dropdown .ellipsis-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    /* Ajusta otros estilos según sea necesario para el menú desplegable */
+}
+
+.dropdown:hover .ellipsis-content {
+    display: block;
+}
+  .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .ellipsis-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        padding: 12px;
+        z-index: 1; /* Asegura que el menú aparezca encima de otros elementos */
+        right: 0; /* Alinea el menú a la derecha */
+    }
+
+    .dropdown:hover .ellipsis-content {
+        display: block;
+    }
