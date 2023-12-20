@@ -10,4 +10,10 @@ router.get('/usuarios/editar/:id', CrudUsersController.formularioEditarUsuario);
 router.post('/usuarios/editar/:id', CrudUsersController.editarUsuario);
 router.delete('/usuarios/eliminar/:id', CrudUsersController.eliminarUsuario);
 
+router.get('/exportar-csv', CrudUsersController.exportarCSV);
+router.get('/exportar-pdf', CrudUsersController.exportarPDF);
+router.get('/exportar-excel', CrudUsersController.exportarExcel);
+
+router.get('/previsualizar-pdf', CrudUsersController.previsualizarPDF);
+
 module.exports = router;

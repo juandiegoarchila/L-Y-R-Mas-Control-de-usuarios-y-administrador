@@ -5,11 +5,24 @@ const { getStorage, ref, deleteObject } = require('firebase/storage');
 const app = require('../config/Conexion');
 const db = getFirestore(app);
 
+const json2csv = require('json2csv').parse;
+const { jsPDF } = require('jspdf');
+require('jspdf-autotable');
+const XLSX = require('xlsx');
+const fs = require('fs');
+const path = require('path'); // Importa el módulo path para trabajar con rutas de archivos
+
+const NUEVO_ANCHO = 50;  // Ajusta el ancho deseado de la imagen en el PDF
+const NUEVA_ALTURA = 50; // Ajusta la altura deseada de la imagen en el PDF
+
+
+
 async function obtenerUsuariosDesdeFirestore() {
   const usuariosCollection = collection(db, 'users');
   const usuariosSnapshot = await getDocs(usuariosCollection);
   return usuariosSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
+
 
 async function obtenerUsuarioPorId(id) {
   const usuariosCollection = collection(db, 'users');
@@ -112,6 +125,10 @@ async function buscarUsuariosEnFirestore(terminoBusqueda) {
     console.error('Error al buscar usuarios en Firestore:', error);
     throw error;
   }
+}
+async function getImageBase64(imagePath) {
+  const image = fs.readFileSync(imagePath);
+  return 'data:image/jpeg;base64,' + image.toString('base64');
 }
 
 const CrudUsersController = {};
@@ -232,6 +249,250 @@ CrudUsersController.eliminarUsuario = async function (req, res) {
     res.redirect('/Crud/Users/usuarios');
   } catch (error) {
     console.error('Error al eliminar usuario en Firestore:', error);
+    res.status(500).send('Error interno del servidor');
+  }
+};
+
+CrudUsersController.exportarCSV = async function (req, res) {
+  try {
+    const usuarios = await obtenerUsuariosDesdeFirestore(); // Obtén tus datos de la base de datos como lo haces actualmente
+
+    // Convierte los datos a formato CSV
+    const csv = json2csv(usuarios, { fields: ['name', 'email'] });
+
+    // Envía el archivo CSV al cliente
+    res.header('Content-Type', 'text/csv');
+    res.attachment('usuarios.csv');
+    res.send(csv);
+  } catch (error) {
+    console.error('Error al exportar usuarios como CSV:', error);
+    res.status(500).send('Error interno del servidor');
+  }
+};
+
+CrudUsersController.exportarPDF = async function (req, res) {
+  try {
+    // Obtener la lista de usuarios desde Firestore
+    const usuarios = await obtenerUsuariosDesdeFirestore();
+
+    // Crear el documento PDF
+    const pdf = new jsPDF();
+
+    // Definir las coordenadas y dimensiones de la imagen
+    const anchoPagina = 210;  // Supongamos que el ancho de la página es de 210 mm
+    const anchoImagen = 30;
+    const xImagen = anchoPagina - anchoImagen - 5;  // 5 es un margen adicional para separar la imagen del borde
+    const yImagen = 5;
+    const widthImagen = 30;
+    const heightImagen = 30;
+
+    // Agregar la imagen al PDF usando dataURL
+    const imagePath = path.join(__dirname, '..', 'public', 'imagenes', 'col.jpg');
+    const imageBase64 = await getImageBase64(imagePath);
+    pdf.addImage(imageBase64, 'JPEG', xImagen, yImagen, widthImagen, heightImagen);
+
+    // Título del documento
+    pdf.setFontSize(16);
+    pdf.text('Lista de Usuarios', 15, 45);
+
+    // Definir las coordenadas y dimensiones de la tabla
+    const xTabla = 15;
+    const yTabla = 50;
+
+    // Configurar la tabla de usuarios
+    const headers = ['ID', 'Nombre', 'Correo Electrónico'];
+    const data = usuarios.map((usuario, index) => [index + 1, usuario.name, usuario.email]);
+
+    pdf.autoTable({
+      startY: yTabla,
+      head: [headers],
+      body: data,
+      theme: 'grid',
+      styles: { cellPadding: 2, fontSize: 10 },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      columnStyles: {
+        0: { fontStyle: 'normal', textColor: [0, 0, 0] },
+        1: { fontStyle: 'normal', textColor: [0, 0, 0] },
+        2: { fontStyle: 'normal', textColor: [0, 0, 0] },
+      },
+    });
+
+    // Guardar el PDF temporalmente en el servidor
+    const tempDir = 'temp';
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir);
+    }
+    const pdfPath = path.join(tempDir, 'usuarios_temp.pdf');
+    pdf.save(pdfPath);
+
+    // Enviar el archivo PDF al cliente
+    const pdfData = fs.readFileSync(pdfPath);
+
+    // Configurar el encabezado Content-Disposition para que el navegador descargue el PDF
+    res.header('Content-Disposition', 'attachment; filename=usuarios_exportacion.pdf');
+
+    res.contentType('application/pdf');
+    res.send(pdfData);
+  } catch (error) {
+    console.error('Error al exportar usuarios como PDF:', error);
+    res.status(500).send('Error interno del servidor');
+  }
+};
+
+
+async function getImageBase64(imagePath) {
+  const image = fs.readFileSync(imagePath);
+  return 'data:image/jpeg;base64,' + image.toString('base64');
+}
+
+
+
+
+CrudUsersController.previsualizarPDF = async function (req, res) {
+  try {
+    const usuarios = await obtenerUsuariosDesdeFirestore();
+
+    // Definir las coordenadas y dimensiones de la imagen y el texto
+    const anchoPagina = 210;
+    const anchoElemento = 30;
+    const xElemento = anchoPagina - anchoElemento - 10;
+    const yElemento = 5;
+    const widthElemento = 20;
+    const heightElemento = 20;
+
+    // Crear el documento PDF
+    const pdf = new jsPDF();
+
+    // Agregar la imagen al PDF usando dataURL
+    const imagePath = path.join(__dirname, '..', 'public', 'imagenes', 'col.jpg');
+    const imageBase64 = await getImageBase64(imagePath);
+
+    // Ajustar las coordenadas de la imagen según tu preferencia
+    const xImagen = 163; // ajusta según tu preferencia
+    const yImagen = 13; // ajusta según tu preferencia
+    const widthImagen = 20; // ajusta según tu preferencia
+    const heightImagen = 20; // ajusta según tu preferencia
+    pdf.addImage(imageBase64, 'JPEG', xImagen, yImagen, widthImagen, heightImagen);
+
+
+     // Agregar el texto al PDF
+     const textoCodigo = 'CÓDIGO';
+     const valorCodigo = 'RE-GAC-033';
+     const textoColegio = 'COLEGIO AMERICANO DE BOGOTÁ - NIT. 800.156.763-3';
+ 
+     pdf.setFontSize(8);
+     const estiloCeldaD = { width: xElemento - 15, border: '1' };
+ 
+      // Celda para CÓDIGO: RE-GAC-033
+      pdf.rect(14, yElemento + 6, xElemento - 135, 6);
+      pdf.text(`${textoCodigo} ${valorCodigo}`, 15, yElemento + 10, estiloCeldaD);
+
+       pdf.rect(49, yElemento + 6, xElemento - 65, 12);
+       pdf.text(`${textoColegio}`, 65, yElemento + 13, { width: xElemento + 10,estiloCeldaD, border: '1' });
+
+
+    // Otras frases
+      const textoVersion = 'VERSIÓN'
+      const valorVersion = 'Vs-06'
+      const textoVigencia = 'VIGENCIA'
+      const valorVigencia = '04/01/2024'
+      const textoNombreFormato = 'NOMBRE DEL FORMATO'
+      const valorNombreFormato = 'INFORME ANUAL DEL ESTUDIANTE PREESCOLAR A GRADO DÉCIMO';
+
+      // Configurar estilo de celda
+      const estiloCelda = { width: xElemento - 15, border: '1' };
+
+      pdf.setDrawColor(0);
+      pdf.setFillColor(255, 255, 255);
+
+      // Frase 1: VERSIÓN
+      pdf.rect(14, yElemento + 12, xElemento - 135, 6);
+      pdf.text(`${textoVersion} ${valorVersion}`, 15, yElemento + 16, estiloCelda);
+
+      // Frase 2: VIGENCIA
+      pdf.rect(14, yElemento + 18, xElemento - 135, 6);
+      pdf.text(`${textoVigencia} ${valorVigencia}`, 15, yElemento + 22, estiloCelda);
+
+      // Frase 3: NOMBRE DEL FORMATO
+      pdf.rect(14, yElemento + 24, xElemento - 135, 6);
+      pdf.text(`${textoNombreFormato}`, 15, yElemento + 28, estiloCelda);
+
+      // Frase 4: VALOR DEL FORMATO
+      pdf.rect(49, yElemento + 18, xElemento - 65, 12);
+      pdf.text(`${valorNombreFormato}`, 55, yElemento + 25, estiloCelda);
+
+      // CELDA IMAGEN
+      pdf.rect(49, yElemento + 6, xElemento - 25, 24);
+
+    // Título del documento
+    pdf.setFontSize(16);
+    pdf.text('Lista de Usuarios', 15, 55, { border: '1' });
+
+    // Definir las coordenadas y dimensiones de la tabla
+    const xTabla = 15;
+    const yTabla = 60;
+
+    // Configurar la tabla de usuarios
+    const headers = ['ID', 'Nombre', 'Correo Electrónico'];
+    const data = usuarios.map((usuario, index) => [index + 1, usuario.name, usuario.email]);
+
+    pdf.autoTable({
+      startY: yTabla,
+      head: [headers],
+      body: data,
+      theme: 'grid',
+      styles: { cellPadding: 2, fontSize: 10, border: '1' },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      columnStyles: {
+        0: { fontStyle: 'normal', textColor: [0, 0, 0] },
+        1: { fontStyle: 'normal', textColor: [0, 0, 0] },
+        2: { fontStyle: 'normal', textColor: [0, 0, 0] },
+      },
+    });
+
+    // Guardar el PDF temporalmente en el servidor
+    const tempDir = 'temp';
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir);
+    }
+    const pdfPath = path.join(tempDir, 'usuarios_temp.pdf');
+    pdf.save(pdfPath);
+
+    // Enviar el archivo PDF al cliente para previsualización
+    const pdfData = fs.readFileSync(pdfPath);
+
+    // Configurar el encabezado Content-Disposition para que el navegador abra el PDF en lugar de descargarlo
+    res.header('Content-Disposition', 'inline; filename=usuarios_previsualizacion.pdf');
+
+    res.contentType('application/pdf');
+    res.send(pdfData);
+  } catch (error) {
+    console.error('Error al previsualizar usuarios como PDF:', error);
+    res.status(500).send('Error interno del servidor');
+  }
+};
+
+
+
+
+
+
+
+CrudUsersController.exportarExcel = async function (req, res) {
+  try {
+    const usuarios = await obtenerUsuariosDesdeFirestore();
+
+    // Crear el libro de Excel
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(usuarios);
+    XLSX.utils.book_append_sheet(wb, ws, 'Usuarios');
+
+    // Guardar el libro de Excel y enviarlo al cliente
+    res.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.attachment('usuarios.xlsx');
+    res.send(XLSX.write(wb, { bookType: 'xlsx', type: 'buffer' }));
+  } catch (error) {
+    console.error('Error al exportar usuarios como Excel:', error);
     res.status(500).send('Error interno del servidor');
   }
 };
