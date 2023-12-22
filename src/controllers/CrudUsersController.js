@@ -272,32 +272,85 @@ CrudUsersController.exportarCSV = async function (req, res) {
 
 CrudUsersController.exportarPDF = async function (req, res) {
   try {
-    // Obtener la lista de usuarios desde Firestore
     const usuarios = await obtenerUsuariosDesdeFirestore();
+
+    // Definir las coordenadas y dimensiones de la imagen y el texto
+    const anchoPagina = 210;
+    const anchoElemento = 30;
+    const xElemento = anchoPagina - anchoElemento - 10;
+    const yElemento = 5;
+    const widthElemento = 20;
+    const heightElemento = 20;
 
     // Crear el documento PDF
     const pdf = new jsPDF();
 
-    // Definir las coordenadas y dimensiones de la imagen
-    const anchoPagina = 210;  // Supongamos que el ancho de la página es de 210 mm
-    const anchoImagen = 30;
-    const xImagen = anchoPagina - anchoImagen - 5;  // 5 es un margen adicional para separar la imagen del borde
-    const yImagen = 5;
-    const widthImagen = 30;
-    const heightImagen = 30;
-
     // Agregar la imagen al PDF usando dataURL
     const imagePath = path.join(__dirname, '..', 'public', 'imagenes', 'col.jpg');
     const imageBase64 = await getImageBase64(imagePath);
+
+    // Ajustar las coordenadas de la imagen según tu preferencia
+    const xImagen = 163; // ajusta según tu preferencia
+    const yImagen = 13; // ajusta según tu preferencia 
+    const widthImagen = 20; // ajusta según tu preferencia
+    const heightImagen = 20; // ajusta según tu preferencia
     pdf.addImage(imageBase64, 'JPEG', xImagen, yImagen, widthImagen, heightImagen);
+
+
+     // Agregar el texto al PDF
+     const textoCodigo = 'CÓDIGO';
+     const valorCodigo = 'RE-GAC-033';
+     const textoColegio = 'COLEGIO AMERICANO DE BOGOTÁ - NIT. 800.156.763-3';
+    pdf.setFontSize(8);
+    const estiloCeldaD = { width: xElemento - 15, border: '1' };
+
+    // Celda para CÓDIGO: RE-GAC-033
+    pdf.rect(14, yElemento + 6, xElemento - 135, 6);
+    pdf.text(`${textoCodigo} ${valorCodigo}`, 15, yElemento + 10, estiloCeldaD);
+
+    pdf.rect(49, yElemento + 6, xElemento - 65, 12);
+    pdf.text(`${textoColegio}`, 65, yElemento + 13, { width: xElemento + 10, estiloCeldaD, border: '1' });
+
+    // Otras frases
+    const textoVersion = 'VERSIÓN';
+    const valorVersion = 'Vs-06';
+    const textoVigencia = 'VIGENCIA';
+    const valorVigencia = '04/01/2024';
+    const textoNombreFormato = 'NOMBRE DEL FORMATO';
+    const valorNombreFormato = 'INFORME ANUAL DEL ESTUDIANTE PREESCOLAR A GRADO DÉCIMO';
+
+    // Configurar estilo de celda
+    const estiloCelda = { width: xElemento - 15, border: '1' };
+
+    pdf.setDrawColor(0);
+    pdf.setFillColor(255, 255, 255);
+
+    // Frase 1: VERSIÓN
+    pdf.rect(14, yElemento + 12, xElemento - 135, 6);
+    pdf.text(`${textoVersion} ${valorVersion}`, 15, yElemento + 16, estiloCelda);
+
+    // Frase 2: VIGENCIA
+    pdf.rect(14, yElemento + 18, xElemento - 135, 6);
+    pdf.text(`${textoVigencia} ${valorVigencia}`, 15, yElemento + 22, estiloCelda);
+
+    // Frase 3: NOMBRE DEL FORMATO
+    pdf.rect(14, yElemento + 24, xElemento - 135, 6);
+    pdf.text(`${textoNombreFormato}`, 15, yElemento + 28, estiloCelda);
+
+    // Frase 4: VALOR DEL FORMATO
+    pdf.rect(49, yElemento + 18, xElemento - 65, 12);
+    pdf.text(`${valorNombreFormato}`, 55, yElemento + 25, estiloCelda);
+
+    // CELDA IMAGEN
+    pdf.rect(49, yElemento + 6, xElemento - 25, 24);
 
     // Título del documento
     pdf.setFontSize(16);
-    pdf.text('Lista de Usuarios', 15, 45);
+    pdf.text('Informe de Usuarios', 15, 55, { border: '1' });
 
     // Definir las coordenadas y dimensiones de la tabla
     const xTabla = 15;
-    const yTabla = 50;
+    const yTabla = 60;
 
     // Configurar la tabla de usuarios
     const headers = ['ID', 'Nombre', 'Correo Electrónico'];
@@ -308,7 +361,7 @@ CrudUsersController.exportarPDF = async function (req, res) {
       head: [headers],
       body: data,
       theme: 'grid',
-      styles: { cellPadding: 2, fontSize: 10 },
+      styles: { cellPadding: 2, fontSize: 10, border: '1' },
       alternateRowStyles: { fillColor: [240, 240, 240] },
       columnStyles: {
         0: { fontStyle: 'normal', textColor: [0, 0, 0] },
@@ -340,6 +393,8 @@ CrudUsersController.exportarPDF = async function (req, res) {
 };
 
 
+
+
 async function getImageBase64(imagePath) {
   const image = fs.readFileSync(imagePath);
   return 'data:image/jpeg;base64,' + image.toString('base64');
@@ -369,7 +424,7 @@ CrudUsersController.previsualizarPDF = async function (req, res) {
 
     // Ajustar las coordenadas de la imagen según tu preferencia
     const xImagen = 163; // ajusta según tu preferencia
-    const yImagen = 13; // ajusta según tu preferencia
+    const yImagen = 13; // ajusta según tu preferencia 
     const widthImagen = 20; // ajusta según tu preferencia
     const heightImagen = 20; // ajusta según tu preferencia
     pdf.addImage(imageBase64, 'JPEG', xImagen, yImagen, widthImagen, heightImagen);
@@ -426,7 +481,7 @@ CrudUsersController.previsualizarPDF = async function (req, res) {
 
     // Título del documento
     pdf.setFontSize(16);
-    pdf.text('Lista de Usuarios', 15, 55, { border: '1' });
+    pdf.text('Informe de Usuarios', 15, 55, { border: '1' });
 
     // Definir las coordenadas y dimensiones de la tabla
     const xTabla = 15;
